@@ -166,7 +166,6 @@ if aggregate_data
     agg_RXRANGE=[];                             % Rx range [m]
     agg_TXRANGE=[];                             % Tx range [m]
     agg_NST=[];                                 % overall quality
-    agg_LF=[];                                  % land flag
     agg_QC=[];                                  % Quality Flag
     agg_DDM_NBRCS=[];                           % NBRCS
     agg_KURTOSIS=[];                            % Kurtosis
@@ -198,7 +197,7 @@ for ii=1:length(datelist)     % loop on all the days
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
         [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
-            REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,LF,BRCS]= ...
+            REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -221,7 +220,6 @@ for ii=1:length(datelist)     % loop on all the days
             agg_PA=cat(1,agg_PA, PA(:));
             agg_QC=cat(1,agg_QC, QC(:)); 
             agg_NF=cat(1,agg_NF, NF(:));
-            agg_LF=cat(1,agg_LF,LF(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);                                      
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
             % agg_TXRANGE=cat(1,agg_TXRANGE,TXRANGE);
@@ -230,7 +228,7 @@ for ii=1:length(datelist)     % loop on all the days
             disp('% saving CyGNSS data');
             save([CyGoutpath datechar '_2.mat'], 'Year', 'DoY', 'SoD', 'SCID', ...  
                 'PRN', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'NF','LF', '-v7.3')
+                'REFLECTIVITY_LINEAR', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'NF', '-v7.3')
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -262,13 +260,12 @@ if aggregate_data
     PA=agg_PA;
     QC=agg_QC; 
     NF=agg_NF;
-    LF=agg_LF;
     BRCS=agg_BRCS;   
 
     % Saving aggregated data
     save([CyGoutpath 'aggregated_' daterangechar '_2.mat'], 'Year', 'DoY', 'SoD', 'SCID', ...  
                 'PRN', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'NF','LF', '-v7.3');
+                'REFLECTIVITY_LINEAR', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'NF', '-v7.3');
 end
 s=duration(0,0,toc);
 close all

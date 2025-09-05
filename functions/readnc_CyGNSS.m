@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain, ...
-    eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,lf,pa,Reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs]= ...
+    eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,Reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs]= ...
     readnc_CyGNSS(inpath,filename,lambda,Doppler_bins,savespace)
 
      % Reading data
@@ -64,8 +64,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain,
              rxrange=rxrange(pos);
              txrange=txrange(pos);
              ddm_nbrcs=ddm_nbrcs(pos);
-             qc=qc(pos);  
-             lf=lf(pos);
+             qc=qc(pos);
              peak=peak(pos);
              pa=pa(:,:,pos);
 
@@ -87,8 +86,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain,
              rxrange=rxrange(:);
              txrange=txrange(:);
              ddm_nbrcs=ddm_nbrcs(:);
-             qc=qc(:);  
-             lf=lf(:);
+             qc=qc(:);
              peak=peak(:);
              pa=reshape(pa(:,:,:,:),size(pa,1),size(pa,2),size(pa,3)*size(pa,4));
 

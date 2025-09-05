@@ -17,7 +17,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
-        REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,LF, BRCS]= ...
+        REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     SCID=[];                                % CYGNSS sat ID
@@ -36,7 +36,6 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, .
     RXRANGE=[];                             % Rx range [m]
     TXRANGE=[];                             % Tx range [m]
     NST=[];                                 % overall quality
-    LF=[];                                  % land flag
     QC=[];                                  % Quality Flag
     DDM_NBRCS=[];                           % NBRCS
     KURTOSIS=[];                            % Kurtosis
@@ -52,7 +51,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, .
             infile=chkfile.name;  
             disp(['% reading satellite ' num2str(jj) ' - file ' infile ])
             [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain, ...
-                eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,lf,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs]=readnc_CyGNSS(inpath,infile,lambda,Doppler_bins,savespace); 
+                eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs]=readnc_CyGNSS(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge') %Kurtosis, Kurtosis zero doppler and
             TE_width=computeTE(pa,delay_vector,Power_threshold);         
@@ -70,7 +69,6 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, .
             GAIN=cat(1,GAIN, gain(:));
             EIRP=cat(1,EIRP, eirp(:));
             SNR=cat(1,SNR, snr(:));
-            LF=cat(1,LF,lf(:));
             QC=cat(1,QC, qc(:)); 
             PA=cat(1,PA, reflectivity_linear(:));
             NF=cat(1,NF, nf(:));
