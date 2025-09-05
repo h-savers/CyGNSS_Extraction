@@ -73,7 +73,7 @@ save('D:\Hamed\HydroGNSS_CalVal\CyGNSS_Extraction\conf\Configuration.mat', 'Answ
 
 %%%%%%%%%%%%%%%%%%% DEFINING GENERAL PARAMETERS %%%%%%%%%%%%%%%%%%%%%%%%%%%
 savespace=Answer{4};                                                            % to apply the CYGNSS land flag before saving (it significantly reduces the size of output file and speeds up the processing
-aggregate_data = Answer{11};                                                     % to aggregate data from different days and save it in a single file
+aggregate_data = strcmpi(strtrim(Answer{11}), "true");                                                     % to aggregate data from different days and save it in a single file
 %%%%%%%%%%%%%%%%%%%%%%%%%% Geographic limits %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 LatMin=Answer{7};
 LatMax=Answer{8};
@@ -214,7 +214,7 @@ if aggregate_data
     BRCS=agg_BRCS;   
 
     % Saving aggregated data
-    save([CyGoutpath 'aggregated_' daterangechar '_2.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
+    save([CyGoutpath, '/', 'aggregated_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
                 'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR_L1', 'PHI_Initial_sp_az_orbit', ...
                 'REFLECTIVITY_LINEAR_L1', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor', '-v7.3');
 end
