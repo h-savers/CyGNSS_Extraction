@@ -215,8 +215,8 @@ if aggregate_data
 
     % Saving aggregated data
     save([CyGoutpath, '/', 'aggregated_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR_L1', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor', '-v7.3');
+                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
+                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor', '-v7.3');
 end
 s=duration(0,0,toc);
 close all
