@@ -26,7 +26,8 @@ else
     end
     mode="input" ;
 end
-[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format] = ReadConfFile(configurationPath);
+[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+    snr_th, rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath);
 %
 switch mode
     case "GUI" 
@@ -86,7 +87,8 @@ out_format=Answer{13};
 % init_SM_Day=datetime(Answer{2}) ; 
 % final_SM_Day=datetime(Answer{3}) ; 
 % write the new configuration file
-WriteConfig(configurationPath, Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format);
+WriteConfig(configurationPath, Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+     snr_th, rx_gain_th, inc_angl_th, nsnr_th);
 aggregate_data = strcmpi(strtrim(Answer{12}), "Yes");  % numeric switch to aggregate data from different days and save it in a single file
 %%%%%%%%%%%%%%%%%%%%%%%%%% Temporal limits %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -101,7 +103,8 @@ aggregate_data = strcmpi(strtrim(Answer{12}), "Yes");  % numeric switch to aggre
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     case "input" 
     disp('input mode')
-[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format] = ReadConfFile(configurationPath);
+[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format, ...
+    snr_th, sp_rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath);
 % end switch between GUI and input
 end
 
@@ -211,7 +214,7 @@ if aggregate_data
     agg_SPLON=[];                               % SP lon on ground
     agg_THETA=[];                               % incidence angle
     agg_PHI_Initial_sp_az_orbit=[];             % azimuth angle in specular point orbit frame
-%    agg_GAIN=[];                                % gain of receiver antenna [dBi]
+    agg_GAIN=[];                                % gain of receiver antenna [dBi]
     agg_EIRP=[];                                % EIRP [W]
     agg_SNR_L1_L=[];                              % SNR of reflected signal - NOTE: calculated from the uncalibrated DDM in counts [dB]
     agg_PA=[];                                  % peak power
@@ -224,8 +227,13 @@ if aggregate_data
     agg_KURTOSIS=[];                            % Kurtosis
     agg_KURTOSIS_DOPP_0=[];                     % Kurtosis zero-doppler
     agg_TE_WIDTH = [];                          % Trailing Edge (Carreno-Luengo 2020)
-    agg_REFLECTIVITY_LINEAR_L1_L=[];              % Reflectivity
+    agg_REFLECTIVITY_LINEAR_L1_L=[];            % Reflectivity
     agg_BRCS=[];                                % added by Hamed to save full ddm
+    agg_REFLECTIVITY_PEAK=[] ;                  % Reflectivity peak from CyGNSS L1b products
+    agg_QC_2=[];                                % Second Quality Flag
+    agg_COHERENCY_RATIO=[] ;                    % Coherency ratio from CyGNSS L1b products
+    agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
+
 else
     disp('% Processing each day separately and saving individual output files');
 end
@@ -249,8 +257,9 @@ for ii=1:length(datelist)     % loop on all the days
     chkCyGNSSfile=dir([DoY_infolderpath 'cyg0*.ddmi.s' datechar '*.nc']);
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
-        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,EIRP,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
-            REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,noise_floor,BRCS]= ...
+        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
+            REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,noise_floor,BRCS,...
+            REFLECTIVITY_PEAK, QC_2 , COHERENCY_RATIO, DDM_LES]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -262,6 +271,7 @@ for ii=1:length(datelist)     % loop on all the days
             agg_SPLAT=cat(1,agg_SPLAT, SPLAT(:));
             agg_SPLON=cat(1,agg_SPLON, SPLON(:));
             agg_THETA=cat(1,agg_THETA, THETA(:));
+            agg_GAIN=cat(1,agg_GAIN, GAIN) ; 
             agg_EIRP=cat(1,agg_EIRP, EIRP(:));
             agg_SNR_L1_L=cat(1,agg_SNR_L1_L, SNR_L1_L(:));
             agg_PHI_Initial_sp_az_orbit=cat(1,agg_PHI_Initial_sp_az_orbit, PHI_Initial_sp_az_orbit(:));
@@ -273,15 +283,40 @@ for ii=1:length(datelist)     % loop on all the days
             agg_PA=cat(1,agg_PA, PA(:));
             agg_QC=cat(1,agg_QC, QC(:)); 
             agg_NF=cat(1,agg_NF, noise_floor(:));
-            agg_BRCS=cat(3, agg_BRCS, BRCS);                                      
+            agg_BRCS=cat(3, agg_BRCS, BRCS);   
+            agg_REFLECTIVITY_PEAK=cat(1, agg_REFLECTIVITY_PEAK, REFLECTIVITY_PEAK(:)) ; 
+            agg_QC_2=cat(1,agg_QC_2, QC_2(:)); 
+            agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, COHERENCY_RATIO(:)) ;
+            agg_DDM_LES=cat(1, agg_DDM_LES,DDM_LES(:)) ; 
+
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
             % agg_TXRANGE=cat(1,agg_TXRANGE,TXRANGE);
             % agg_NST=cat(1,agg_NST,NST);
         else
-            disp('% saving CyGNSS data');
-            save([CyGoutpath, '/', datechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor', '-v7.3')
+                        % Quality flag 2 - currently using bits:
+                        % 17 (low_confidence_gps_eirp_estimate)
+                        % 22 (gps_pvt_sp3_error)
+                        % 28 (low_quality_gps_ant_knowledge)
+                        % 30 (anomalous_sampling_period)
+                    oqf1=(bitget(QC,17) | bitget(QC,22) | bitget(QC,28) | bitget(QC,30));
+                    % Quality flag 2 - currently using bits:
+                        % 12 (overall)
+                        % 18 (preliminary_gps_ant_knowledge)
+                    oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
+                    NOT_TOBE_USED=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
+
+                    NOT_RECOMMENDED= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
+                    GAIN > rx_gain_th & ...
+                    THETA < inc_angl_th ; % & ...
+                    % nsnr_dB < nsnr_th;                             
+%
+       %%%%% save individual day data 
+       disp('% saving CyGNSS data daily');
+%
+            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
+                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
+                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
+                'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -292,7 +327,6 @@ for ii=1:length(datelist)     % loop on all the days
 end
 %%%%%%%%%%%%%%%%%%%%%%%%% END OF THE MAIN LOOP %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if aggregate_data
-    disp('% Saving aggregated data in a single output file')
     
     % Renaming variables
     DoY=agg_DoY;
@@ -302,6 +336,7 @@ if aggregate_data
     SPLAT=agg_SPLAT;
     SPLON=agg_SPLON;
     THETA=agg_THETA;
+    GAIN=agg_GAIN ; 
     EIRP=agg_EIRP;
     SNR_L1_L=agg_SNR_L1_L;
     PHI_Initial_sp_az_orbit=agg_PHI_Initial_sp_az_orbit;
@@ -314,11 +349,35 @@ if aggregate_data
     QC=agg_QC; 
     noise_floor=agg_NF;
     BRCS=agg_BRCS;   
+    REFLECTIVITY_PEAK=agg_REFLECTIVITY_PEAK ; 
+    QC_2=agg_QC_2; 
+    COHERENCY_RATIO=agg_COHERENCY_RATIO ; 
+    DDM_LES=agg_DDM_LES ; 
+    % apply quality check and filtering
+                        % Quality flag 1 - currently using bits:
+                        % 17 (low_confidence_gps_eirp_estimate)
+                        % 22 (gps_pvt_sp3_error)
+                        % 28 (low_quality_gps_ant_knowledge)
+                        % 30 (anomalous_sampling_period)
+                    oqf1=(bitget(QC,17) | bitget(QC,22) | bitget(QC,28) | bitget(QC,30));
+                        % Quality flag 2 - currently using bits:
+                        % 12 (overall)
+                        % 18 (preliminary_gps_ant_knowledge)
+                    oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
+                    NOT_TOBE_USED=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
+                    NOT_RECOMMENDED=not( SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
+                    GAIN > rx_gain_th & ...
+                    THETA < inc_angl_th) ; % & ...
+                    % nsnr_dB < nsnr_th;                             
+    %
     % Saving aggregated data
-    save([CyGoutpath, '/', 'aggregated_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor', '-v7.3');
+    disp('% Saving aggregated data in a single output file')
+%
+    save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
+                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
+                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
+                 'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
 end
 s=duration(0,0,toc);
 close all

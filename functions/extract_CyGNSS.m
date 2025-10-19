@@ -16,8 +16,9 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
-        REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS]= ...
+function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_orbit, ...
+        REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, ...
+        REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     SCID=[];                                % CYGNSS sat ID
@@ -44,14 +45,20 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, .
     REFLECTIVITY_LINEAR=[];                 % Reflectivity
 
     BRCS=[];                                % added by Hamed to save full ddm
-
+%%%%%%%%%%%%%%%%%%%%% added by Mauro
+    REFLECTIVITY_PEAK=[] ;                  
+    QC_2=[] ;
+    COHERENCY_RATIO=[] ;
+    DDM_LES=[]  ;
+%%%%%%%%%%%%%%%%%%%%%
     for jj=1:nsat     % loop on  the 8 satellites   
         chkfile=dir([inpath 'cyg0' num2str(jj) '.ddmi.s' datechar '*.nc']);                    % to avoid end of execution in case file is missing
         if ~isempty(chkfile)    
             infile=chkfile.name;  
             disp(['% reading satellite ' num2str(jj) ' - file ' infile ])
             [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain, ...
-                eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
+                eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs,...
+                reflectivity_peak, qc_2 coherency_ratio, ddm_les]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge') %Kurtosis, Kurtosis zero doppler and
             TE_width=computeTE(pa,delay_vector,Power_threshold);         
@@ -82,6 +89,12 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,EIRP,SNR,PHI_Initial_sp_az_orbit, .
             NST=cat(1,NST,nst_full);
 
             BRCS=cat(3, BRCS, brcs);                                       % added by Hamed to keep full ddm
+
+            REFLECTIVITY_PEAK=cat(1,REFLECTIVITY_PEAK,reflectivity_peak);                
+            QC_2=cat(1,QC_2, qc_2(:));
+            COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
+            DDM_LES=cat(1,DDM_LES,ddm_les);    
+
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
             disp(['% WARNING: cyg0' num2str(jj) ' satellite missing for the date ' datechar])

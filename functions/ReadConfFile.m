@@ -1,5 +1,6 @@
 function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath,...
-    LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format] = ReadConfFile(configurationPath)
+    LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+    snr_th, rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath)
 %%%%%%%  Read configuration file
 %
             lines = string(splitlines(fileread(configurationPath)));
@@ -80,5 +81,30 @@ function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath
             ConfigRightLine= find(ConfigRightLine==1)  ;   
             startIndex= regexp(lines(ConfigRightLine),'=') ; 
             out_format= extractAfter(lines(ConfigRightLine),startIndex) ; % 
+            %%   
+            ConfigRightLine= contains(lines,'snr_dB_th')  ;                   % dB, minimum SNR
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            snr_th= extractAfter(lines(ConfigRightLine),startIndex) ; 
+            snr_th=double(snr_th) ; 
+            
+
+            ConfigRightLine= contains(lines,'rx_gain_dB_th')  ;               % dBi, minimum receiver gain
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            rx_gain_th= extractAfter(lines(ConfigRightLine),startIndex) ; 
+            rx_gain_th=double(rx_gain_th) ; 
+
+            ConfigRightLine= contains(lines,'inc_angl_th')  ;               % degrees, maximum incidence angle
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            inc_angl_th= extractAfter(lines(ConfigRightLine),startIndex) ; 
+            inc_angl_th=double(inc_angl_th) ;  
+
+            ConfigRightLine= contains(lines,'nsnr_th')  ;                  % dB, maximum NSNR
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            nsnr_th= extractAfter(lines(ConfigRightLine),startIndex) ;
+            nsnr_th=double(nsnr_th) ; 
 
 end
