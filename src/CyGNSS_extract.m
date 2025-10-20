@@ -250,7 +250,7 @@ for ii=1:length(datelist)     % loop on all the days
     disp(['% now processing day ' num2str(ii) ' out of ' num2str(length(datelist)) ', DoY: ' num2str(doy) ', date: ' datestr(datelist(ii),'yyyy-mm-dd')]);
     
     %%%%%%%%%%%%%%%%%%%%%% Defining paths for each day %%%%%%%%%%%%%%%%%%%%%%%%%
-    DoY_infolderpath     = [CyGinpath, '\' , Year, '\', num2str(doy), '\'];        % Path to DoY folders containing input CyGNSS .nc data
+    DoY_infolderpath     = [CyGinpath, '\' , Year, '\', num2str(doy, '%03.0f'), '\'];        % Path to DoY folders containing input CyGNSS .nc data
 
 
     %%%%%%%%%%%%%%%%%%%%%% CyGNSS data extraction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -366,9 +366,9 @@ if aggregate_data
                     oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
                     NOT_TOBE_USED=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
-                    NOT_RECOMMENDED=not( SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
-                    GAIN > rx_gain_th & ...
-                    THETA < inc_angl_th) ; % & ...
+                    NOT_RECOMMENDED=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
+                    GAIN < rx_gain_th | ...
+                    THETA > inc_angl_th) ; % & ...
                     % nsnr_dB < nsnr_th;                             
     %
     % Saving aggregated data

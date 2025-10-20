@@ -58,7 +58,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             disp(['% reading satellite ' num2str(jj) ' - file ' infile ])
             [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,gain, ...
                 eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs,...
-                reflectivity_peak, qc_2 coherency_ratio, ddm_les]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
+                reflectivity_peak, qc_2, coherency_ratio, ddm_les]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge') %Kurtosis, Kurtosis zero doppler and
             TE_width=computeTE(pa,delay_vector,Power_threshold);         
