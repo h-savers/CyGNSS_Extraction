@@ -9,15 +9,15 @@
 function [pr, index] = detect_coherence(DDM,SNR)
 
 %Pre-processing
-if size(DDM,2)~=187
+if size(DDM,1)~=11 | size(DDM,2)~=17
     error('The input matrix should be reshaped to N x 187.');
 end
-[N]=size(DDM,1);
-DDM=reshape(DDM',[11,17,N]);
+[N]=size(DDM,3);
+% DDM=reshape(DDM',[11,17,N]);
 
 %Noise-exclusion threshold in Fig.2 of the reference paper
 x=0:5:30;
-y=[70 40 15 7.5 5 0.25 0];
+y=[70 40 15 7.5 4 2 0];
 ex_noise=polyval(polyfit(x,y,3),SNR)/100;
 
 %Find the indices of the sharp peak in DDMs
@@ -37,16 +37,21 @@ ind_dop(ind_dop<3)=3;ind_dop(ind_dop>9)=9;
 %reference papar
 for a=1:N
     tmp=DDM(:,:,a);tmp(tmp<ex_noise(a)*DDM(ind_dop(a),ind_tau(a),a))=0;
-    cin(a)=sum(sum(DDM(ind_dop(a)-2:ind_dop(a)+2,ind_tau(a)-1:ind_tau(a)+1,a)));
+    cin(a)=sum(sum(tmp(ind_dop(a)-2:ind_dop(a)+2,ind_tau(a)-1:ind_tau(a)+1))); 
     cout(a)=sum(sum(tmp))-cin(a);
 end
 pr=cin./cout;
 
 %Return indices
 % index=find(pr>=2);
+% 
+% if (pr>=2)
+%     index=1;
+% else
+%     index=0;
+% end
+index=NaN(N,1) ; 
+index(find(pr>=2))=1 ;
+index(find(pr<2))=0 ;
 
-if (pr>=2)
-    index=1;
-else
-    index=0;
 end

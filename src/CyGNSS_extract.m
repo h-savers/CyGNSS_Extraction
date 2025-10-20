@@ -233,6 +233,7 @@ if aggregate_data
     agg_QC_2=[];                                % Second Quality Flag
     agg_COHERENCY_RATIO=[] ;                    % Coherency ratio from CyGNSS L1b products
     agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
+    agg_POWER_RATIO=[] ;                        % Power raio from Mohammad M. Al-Khaldi et al., 2021
 
 else
     disp('% Processing each day separately and saving individual output files');
@@ -259,7 +260,7 @@ for ii=1:length(datelist)     % loop on all the days
         disp('% Extracting CyGNSS data ...')
         [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
             REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,noise_floor,BRCS,...
-            REFLECTIVITY_PEAK, QC_2 , COHERENCY_RATIO, DDM_LES]= ...
+            REFLECTIVITY_PEAK, QC_2 , COHERENCY_RATIO, DDM_LES, POWER_RATIO]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -288,6 +289,8 @@ for ii=1:length(datelist)     % loop on all the days
             agg_QC_2=cat(1,agg_QC_2, QC_2(:)); 
             agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, COHERENCY_RATIO(:)) ;
             agg_DDM_LES=cat(1, agg_DDM_LES,DDM_LES(:)) ; 
+            agg_POWER_RATIO=cat(1, agg_POWER_RATIO,POWER_RATIO(:)) ; 
+
 
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
             % agg_TXRANGE=cat(1,agg_TXRANGE,TXRANGE);
@@ -316,7 +319,7 @@ for ii=1:length(datelist)     % loop on all the days
             save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
                 'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
                 'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
-                'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
+                'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -353,6 +356,7 @@ if aggregate_data
     QC_2=agg_QC_2; 
     COHERENCY_RATIO=agg_COHERENCY_RATIO ; 
     DDM_LES=agg_DDM_LES ; 
+    POWER_RATIO=agg_POWER_RATIO ; 
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
                         % 17 (low_confidence_gps_eirp_estimate)
@@ -377,7 +381,7 @@ if aggregate_data
     save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
                 'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
                 'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
-                 'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
+                 'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
 end
 s=duration(0,0,toc);
 close all

@@ -18,7 +18,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, ...
-        REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES]= ...
+        REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     SCID=[];                                % CYGNSS sat ID
@@ -45,11 +45,14 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
     REFLECTIVITY_LINEAR=[];                 % Reflectivity
 
     BRCS=[];                                % added by Hamed to save full ddm
+
 %%%%%%%%%%%%%%%%%%%%% added by Mauro
-    REFLECTIVITY_PEAK=[] ;                  
-    QC_2=[] ;
-    COHERENCY_RATIO=[] ;
-    DDM_LES=[]  ;
+    REFLECTIVITY_PEAK=[] ;                  % Reflectivity in lienar units from L1b producxt                  
+    QC_2=[] ;                               % Second quality control flag from L1b product
+    COHERENCY_RATIO=[] ;                    % Coherency ration from L1b produt
+    DDM_LES=[]  ;                           % DDM_LES from L1b product
+    PR=[] ;                                 % Power ration from Mohammad M. Al-Khaldi et al., 2021
+
 %%%%%%%%%%%%%%%%%%%%%
     for jj=1:nsat     % loop on  the 8 satellites   
         chkfile=dir([inpath 'cyg0' num2str(jj) '.ddmi.s' datechar '*.nc']);                    % to avoid end of execution in case file is missing
@@ -61,7 +64,8 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
                 reflectivity_peak, qc_2, coherency_ratio, ddm_les]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge') %Kurtosis, Kurtosis zero doppler and
-            TE_width=computeTE(pa,delay_vector,Power_threshold);         
+            TE_width=computeTE(pa,delay_vector,Power_threshold);      
+            [pr, index] = detect_coherence_v2(pa,snr) ;
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
         % cat variables
             disp('% cat variables ')
@@ -94,6 +98,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             QC_2=cat(1,QC_2, qc_2(:));
             COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
             DDM_LES=cat(1,DDM_LES,ddm_les);    
+            PR=cat(1,PR, pr) ; 
 
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
