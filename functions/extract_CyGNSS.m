@@ -100,7 +100,6 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
             DDM_LES=cat(1,DDM_LES,ddm_les);    
             PR=cat(1,PR, pr) ; 
-pa2
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
             disp(['% WARNING: cyg0' num2str(jj) ' satellite missing for the date ' datechar])
