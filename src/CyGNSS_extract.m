@@ -218,9 +218,9 @@ if aggregate_data
     agg_THETA=[];                               % incidence angle
     agg_PHI_Initial_sp_az_orbit=[];             % azimuth angle in specular point orbit frame
     agg_GAIN=[];                                % gain of receiver antenna [dBi]
-    agg_EIRP=[];                                % EIRP [W]
-    agg_SNR_L1_L=[];                              % SNR of reflected signal - NOTE: calculated from the uncalibrated DDM in counts [dB]
-    agg_PA=[];                                  % peak power
+    agg_EIRP_L1=[];                             % EIRP [W]
+    agg_SNR_L1_L=[];                            % SNR of reflected signal - NOTE: calculated from the uncalibrated DDM in counts [dB]
+    agg_PA_L1_L=[];                                  % peak power
     agg_NF=[];                                  % noise floor
     agg_RXRANGE=[];                             % Rx range [m]
     agg_TXRANGE=[];                             % Tx range [m]
@@ -232,7 +232,7 @@ if aggregate_data
     agg_TE_WIDTH = [];                          % Trailing Edge (Carreno-Luengo 2020)
     agg_REFLECTIVITY_LINEAR_L1_L=[];            % Reflectivity
     agg_BRCS=[];                                % added by Hamed to save full ddm
-    agg_REFLECTIVITY_PEAK=[] ;                  % Reflectivity peak from CyGNSS L1b products
+    agg_REFLECTIVITY_PEAK_L1_L=[] ;                  % Reflectivity peak from CyGNSS L1b products
     agg_QC_2=[];                                % Second Quality Flag
     agg_COHERENCY_RATIO=[] ;                    % Coherency ratio from CyGNSS L1b products
     agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
@@ -261,9 +261,9 @@ for ii=1:length(datelist)     % loop on all the days
     chkCyGNSSfile=dir([DoY_infolderpath 'cyg0*.ddmi.s' datechar '*.nc']);
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
-        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
-            REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,noise_floor,BRCS,...
-            REFLECTIVITY_PEAK, QC_2 , COHERENCY_RATIO, DDM_LES, POWER_RATIO]= ...
+        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP_L1,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
+            REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA_L1_L,QC,noise_floor,BRCS,...
+            REFLECTIVITY_PEAK_L1_L, QC_2 , COHERENCY_RATIO, DDM_LES, POWER_RATIO]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -276,7 +276,7 @@ for ii=1:length(datelist)     % loop on all the days
             agg_SPLON=cat(1,agg_SPLON, SPLON(:));
             agg_THETA=cat(1,agg_THETA, THETA(:));
             agg_GAIN=cat(1,agg_GAIN, GAIN) ; 
-            agg_EIRP=cat(1,agg_EIRP, EIRP(:));
+            agg_EIRP_L1=cat(1,agg_EIRP_L1, EIRP_L1(:));
             agg_SNR_L1_L=cat(1,agg_SNR_L1_L, SNR_L1_L(:));
             agg_PHI_Initial_sp_az_orbit=cat(1,agg_PHI_Initial_sp_az_orbit, PHI_Initial_sp_az_orbit(:));
             agg_REFLECTIVITY_LINEAR_L1_L=cat(1,agg_REFLECTIVITY_LINEAR_L1_L,REFLECTIVITY_LINEAR_L1_L(:));
@@ -284,11 +284,11 @@ for ii=1:length(datelist)     % loop on all the days
             agg_KURTOSIS_DOPP_0=cat(1,agg_KURTOSIS_DOPP_0, KURTOSIS_DOPP_0(:)); 
             agg_TE_WIDTH=cat(1,agg_TE_WIDTH, TE_WIDTH(:)); 
             agg_DDM_NBRCS=cat(1,agg_DDM_NBRCS, DDM_NBRCS(:)); 
-            agg_PA=cat(1,agg_PA, PA(:));
+            agg_PA_L1_L=cat(1,agg_PA_L1_L, PA_L1_L(:));
             agg_QC=cat(1,agg_QC, QC(:)); 
             agg_NF=cat(1,agg_NF, noise_floor(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);   
-            agg_REFLECTIVITY_PEAK=cat(1, agg_REFLECTIVITY_PEAK, REFLECTIVITY_PEAK(:)) ; 
+            agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, REFLECTIVITY_PEAK_L1_L(:)) ; 
             agg_QC_2=cat(1,agg_QC_2, QC_2(:)); 
             agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, COHERENCY_RATIO(:)) ;
             agg_DDM_LES=cat(1, agg_DDM_LES,DDM_LES(:)) ; 
@@ -325,16 +325,16 @@ for ii=1:length(datelist)     % loop on all the days
         subgeo=find(SPLAT >= LatMin & SPLAT <= LatMax & SPLON >= LonMin & SPLON >= LonMax ) ; 
         DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
         pseudo_random_noise=pseudo_random_noise(subgeo) ; SPLAT=SPLAT(subgeo) ; SPLON=SPLON(subgeo) ; THETA=THETA(subgeo) ;
-        GAIN=GAIN(subgeo) ; EIRP=EIRP(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
+        GAIN=GAIN(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
         REFLECTIVITY_LINEAR_L1_L=REFLECTIVITY_LINEAR_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA=PA(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK=REFLECTIVITY_PEAK(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
+        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA_L1_L=PA_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
         DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
     end
             save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
-                'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
+                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
+                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
+                'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -355,7 +355,7 @@ if aggregate_data
     SPLON=agg_SPLON;
     THETA=agg_THETA;
     GAIN=agg_GAIN ; 
-    EIRP=agg_EIRP;
+    EIRP_L1=agg_EIRP_L1;
     SNR_L1_L=agg_SNR_L1_L;
     PHI_Initial_sp_az_orbit=agg_PHI_Initial_sp_az_orbit;
     REFLECTIVITY_LINEAR_L1_L=agg_REFLECTIVITY_LINEAR_L1_L;
@@ -363,11 +363,11 @@ if aggregate_data
     KURTOSIS_DOPP_0=agg_KURTOSIS_DOPP_0; 
     TE_WIDTH=agg_TE_WIDTH; 
     DDM_NBRCS=agg_DDM_NBRCS; 
-    PA=agg_PA;
+    PA_L1_L=agg_PA_L1_L;
     QC=agg_QC; 
     noise_floor=agg_NF;
     BRCS=agg_BRCS;   
-    REFLECTIVITY_PEAK=agg_REFLECTIVITY_PEAK ; 
+    REFLECTIVITY_PEAK_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
     QC_2=agg_QC_2; 
     COHERENCY_RATIO=agg_COHERENCY_RATIO ; 
     DDM_LES=agg_DDM_LES ; 
@@ -396,16 +396,16 @@ if aggregate_data
         subgeo=find(SPLAT >= LatMin & SPLAT <= LatMax & SPLON >= LonMin & SPLON >= LonMax ) ; 
         DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
         pseudo_random_noise=pseudo_random_noise(subgeo) ; SPLAT=SPLAT(subgeo) ; SPLON=SPLON(subgeo) ; THETA=THETA(subgeo) ;
-        GAIN=GAIN(subgeo) ; EIRP=EIRP(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
+        GAIN=GAIN(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
         REFLECTIVITY_LINEAR_L1_L=REFLECTIVITY_LINEAR_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA=PA(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK=REFLECTIVITY_PEAK(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
+        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA_L1_L=PA_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
         DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
     end
         save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA','QC', 'noise_floor',...
-                 'REFLECTIVITY_PEAK', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
+                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
+                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
+                 'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
         
 %
 end
