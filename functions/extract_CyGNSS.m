@@ -63,8 +63,9 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
                 eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,reflectivity_linear,Kurtosis,Kurtosis_dopp0, brcs,...
                 reflectivity_peak, qc_2, coherency_ratio, ddm_les]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
-            disp('% computing  Trailing Edge') %Kurtosis, Kurtosis zero doppler and
-            TE_width=computeTE(pa,delay_vector,Power_threshold);      
+            disp('% computing  Trailing Edge')                     
+            TE_width=computeTE(pa,delay_vector,Power_threshold);  
+            disp('% computing  peak ratio')                       
             [pr, index] = detect_coherence_v2(pa,snr) ;
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
         % cat variables
@@ -99,7 +100,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
             DDM_LES=cat(1,DDM_LES,ddm_les);    
             PR=cat(1,PR, pr) ; 
-
+pa2
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
             disp(['% WARNING: cyg0' num2str(jj) ' satellite missing for the date ' datechar])
