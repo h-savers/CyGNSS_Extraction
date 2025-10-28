@@ -254,7 +254,7 @@ for ii=1:length(datelist)     % loop on all the days
     disp(['% now processing day ' num2str(ii) ' out of ' num2str(length(datelist)) ', DoY: ' num2str(doy) ', date: ' datestr(datelist(ii),'yyyy-mm-dd')]);
     
     %%%%%%%%%%%%%%%%%%%%%% Defining paths for each day %%%%%%%%%%%%%%%%%%%%%%%%%
-    DoY_infolderpath     = [CyGinpath, '\' , Year, '\', num2str(doy, '%03.0f'), '\'];        % Path to DoY folders containing input CyGNSS .nc data
+    DoY_infolderpath     = [CyGinpath, '/' , Year, '/', num2str(doy, '%03.0f'), '/'];        % Path to DoY folders containing input CyGNSS .nc data
 
 
     %%%%%%%%%%%%%%%%%%%%%% CyGNSS data extraction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -402,11 +402,84 @@ if aggregate_data
         REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
         DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
     end
-        save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
+        if out_format=="Matlab"
+            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
                 'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
                 'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
                  'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
+        elseif out_format=="netcdf"
+            % Create the NetCDF file
+            netcdf_cyg = netcdf.create([CyGoutpath, '/', project_name, '_' daterangechar, '.nc'],'netcdf4');
+            
+            % Define the dimension of the NetCDF file
+            dimid = netcdf.defDim(netcdf_cyg, 'record', length(DoY));
+
+            % Assign global attributes
+            netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Name', 'Cygnsss L1a Metadata File');
+    
+            % Define all variables
+            var_DoY = netcdf.defVar(netcdf_cyg,'DoY','NC_DOUBLE',dimid);
+            var_SoD = netcdf.defVar(netcdf_cyg,'SoD','NC_DOUBLE',dimid);
+            var_spacecraft_num = netcdf.defVar(netcdf_cyg,'spacecraft_num','NC_SHORT',dimid);
+            var_pseudo_random_noise = netcdf.defVar(netcdf_cyg,'pseudo_random_noise','NC_SHORT',dimid);
+            var_SPLAT = netcdf.defVar(netcdf_cyg,'SPLAT','NC_DOUBLE',dimid);
+            var_SPLON = netcdf.defVar(netcdf_cyg,'SPLON','NC_DOUBLE',dimid);
+            var_THETA = netcdf.defVar(netcdf_cyg,'THETA','NC_DOUBLE',dimid);
+            var_GAIN = netcdf.defVar(netcdf_cyg,'GAIN','NC_DOUBLE',dimid);
+            var_EIRP_L1 = netcdf.defVar(netcdf_cyg,'EIRP_L1','NC_DOUBLE',dimid);
+            var_SNR_L1_L = netcdf.defVar(netcdf_cyg,'SNR_L1_L','NC_DOUBLE',dimid);
+            var_PHI_Initial_sp_az_orbit = netcdf.defVar(netcdf_cyg,'PHI_Initial_sp_az_orbit','NC_DOUBLE',dimid);
+            var_REFLECTIVITY_LINEAR_L1_L = netcdf.defVar(netcdf_cyg,'REFLECTIVITY_LINEAR_L1_L','NC_DOUBLE',dimid);
+            var_KURTOSIS = netcdf.defVar(netcdf_cyg,'KURTOSIS','NC_DOUBLE',dimid);
+            var_KURTOSIS_DOPP_0 = netcdf.defVar(netcdf_cyg,'KURTOSIS_DOPP_0','NC_DOUBLE',dimid);
+            var_TE_WIDTH = netcdf.defVar(netcdf_cyg,'TE_WIDTH','NC_DOUBLE',dimid);
+            var_DDM_NBRCS = netcdf.defVar(netcdf_cyg,'DDM_NBRCS','NC_DOUBLE',dimid);
+            var_PA_L1_L = netcdf.defVar(netcdf_cyg,'PA_L1_L','NC_DOUBLE',dimid);
+            var_QC = netcdf.defVar(netcdf_cyg,'QC','NC_UINT',dimid);
+            var_noise_floor = netcdf.defVar(netcdf_cyg,'noise_floor','NC_DOUBLE',dimid);
+            var_REFLECTIVITY_PEAK_L1_L = netcdf.defVar(netcdf_cyg,'REFLECTIVITY_PEAK_L1_L','NC_DOUBLE',dimid);
+            var_QC_2 = netcdf.defVar(netcdf_cyg,'QC_2','NC_UINT',dimid);
+            var_COHERENCY_RATIO = netcdf.defVar(netcdf_cyg,'COHERENCY_RATIO','NC_DOUBLE',dimid);
+            var_DDM_LES = netcdf.defVar(netcdf_cyg,'DDM_LES','NC_DOUBLE',dimid);
+            var_POWER_RATIO = netcdf.defVar(netcdf_cyg,'POWER_RATIO','NC_DOUBLE',dimid);
+            var_NOT_TOBE_USED = netcdf.defVar(netcdf_cyg,'NOT_TOBE_USED','NC_BYTE',dimid);
+            var_NOT_RECOMMENDED = netcdf.defVar(netcdf_cyg,'NOT_RECOMMENDED','NC_BYTE',dimid);
         
+            % End definition mode
+            netcdf.endDef(netcdf_cyg);
+        
+            % Write data to variables
+            netcdf.putVar(netcdf_cyg,var_DoY,DoY);
+            netcdf.putVar(netcdf_cyg,var_SoD,SoD);
+            netcdf.putVar(netcdf_cyg,var_spacecraft_num,spacecraft_num);
+            netcdf.putVar(netcdf_cyg,var_pseudo_random_noise,pseudo_random_noise);
+            netcdf.putVar(netcdf_cyg,var_SPLAT,SPLAT);
+            netcdf.putVar(netcdf_cyg,var_SPLON,SPLON);
+            netcdf.putVar(netcdf_cyg,var_THETA,THETA);
+            netcdf.putVar(netcdf_cyg,var_GAIN,GAIN);
+            netcdf.putVar(netcdf_cyg,var_EIRP_L1,EIRP_L1);
+            netcdf.putVar(netcdf_cyg,var_SNR_L1_L,SNR_L1_L);
+            netcdf.putVar(netcdf_cyg,var_PHI_Initial_sp_az_orbit,PHI_Initial_sp_az_orbit);
+            netcdf.putVar(netcdf_cyg,var_REFLECTIVITY_LINEAR_L1_L,REFLECTIVITY_LINEAR_L1_L);
+            netcdf.putVar(netcdf_cyg,var_KURTOSIS,KURTOSIS);
+            netcdf.putVar(netcdf_cyg,var_KURTOSIS_DOPP_0,KURTOSIS_DOPP_0);
+            netcdf.putVar(netcdf_cyg,var_TE_WIDTH,TE_WIDTH);
+            netcdf.putVar(netcdf_cyg,var_DDM_NBRCS,DDM_NBRCS);
+            netcdf.putVar(netcdf_cyg,var_PA_L1_L,PA_L1_L);
+            netcdf.putVar(netcdf_cyg,var_QC,QC);
+            netcdf.putVar(netcdf_cyg,var_noise_floor,noise_floor);
+            netcdf.putVar(netcdf_cyg,var_REFLECTIVITY_PEAK_L1_L,REFLECTIVITY_PEAK_L1_L);
+            netcdf.putVar(netcdf_cyg,var_QC_2,QC_2);
+            netcdf.putVar(netcdf_cyg,var_COHERENCY_RATIO,COHERENCY_RATIO);
+            netcdf.putVar(netcdf_cyg,var_DDM_LES,DDM_LES);
+            netcdf.putVar(netcdf_cyg,var_POWER_RATIO,POWER_RATIO);
+            netcdf.putVar(netcdf_cyg, var_NOT_TOBE_USED, uint8(NOT_TOBE_USED));
+            netcdf.putVar(netcdf_cyg,var_NOT_RECOMMENDED,uint8(NOT_RECOMMENDED));
+            
+            % Close NetCDF file
+            netcdf.close(netcdf_cyg);
+        else disp The request file format is not correcly insert
+        end
 %
 end
 s=duration(0,0,toc);
