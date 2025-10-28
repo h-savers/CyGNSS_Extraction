@@ -5,8 +5,8 @@
 
 function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain, ...
     eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,Reflectivity_linear,Kurtosis,...
-    Kurtosis_dopp0, brcs, reflectivity_peak, qc_2, coherency_ratio, ddm_les]= ...
-    readnc_CyGNSS(inpath,filename,lambda,Doppler_bins,savespace)
+    Kurtosis_dopp0, brcs, reflectivity_peak, qc_2, coherency_ratio, ddm_les, raw_counts]= ...
+    readnc_CyGNSS_v2(inpath,filename,lambda,Doppler_bins,savespace)
 
      % Reading data
      toread=[inpath,filename];
@@ -105,6 +105,9 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      pa=double(netcdf.getVar(ncid,varID)) ;                                % power analog is the DDM in Watt unit
      % pa=ncread(toread,'power_analog');
 
+     varID=netcdf.inqVarID(ncid, 'raw_counts')  ; 
+     raw_counts=double(netcdf.getVar(ncid,varID)) ;                        % DDM bin raw counts
+
      disp('% DDM shape parameters')
 
      varID=netcdf.inqVarID(ncid, 'coherency_ratio')  ;
@@ -138,6 +141,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              qc=qc(pos);
              peak=peak(pos);
              pa=pa(:,:,pos);
+             raw_counts=raw_counts(:,:,pos) ; 
 
              brcs=brcs(:, :, pos);                                         % added by Hamed to save full ddm
 
@@ -166,6 +170,8 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              qc=qc(:);
              peak=peak(:);
              pa=reshape(pa(:,:,:,:),size(pa,1),size(pa,2),size(pa,3)*size(pa,4));
+             raw_counts=reshape(raw_counts(:,:,:,:),size(raw_counts,1),size(raw_counts,2),size(raw_counts,3)*size(raw_counts,4));
+
 
              brcs=brcs(:, :, :);                                         % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
