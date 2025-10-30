@@ -210,6 +210,7 @@ if aggregate_data
     disp(['% Processing data from ' daterangechar ' and saving in a single output file'])
 
     agg_SCID=[];                                % CYGNSS sat ID
+    agg_UTC_Time=[];
     agg_SoD=[];                                 % second of the day
     agg_DoY=[];                                 % day of the year
     agg_PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
@@ -261,7 +262,7 @@ for ii=1:length(datelist)     % loop on all the days
     chkCyGNSSfile=dir([DoY_infolderpath 'cyg0*.ddmi.s' datechar '*.nc']);
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
-        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP_L1,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
+        [UTC_Time,DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP_L1,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
             REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA_L1_L,QC,noise_floor,BRCS,...
             REFLECTIVITY_PEAK_L1_L, QC_2 , COHERENCY_RATIO, DDM_LES, POWER_RATIO]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
@@ -270,6 +271,7 @@ for ii=1:length(datelist)     % loop on all the days
             disp(['% cat variables from day ', datechar ' to aggregated output file']);
             agg_DoY=cat(1,agg_DoY,DoY(:));
             agg_SoD=cat(1,agg_SoD,SoD(:));
+            agg_UTC_Time=cat(1,agg_UTC_Time,UTC_Time(:));
             agg_SCID=cat(1,agg_SCID,spacecraft_num(:));
             agg_PRN=cat(1,agg_PRN, pseudo_random_noise(:));
             agg_SPLAT=cat(1,agg_SPLAT, SPLAT(:));
@@ -349,6 +351,7 @@ if aggregate_data
     % Renaming variables
     DoY=agg_DoY;
     SoD=agg_SoD;
+    UTC_Time=agg_UTC_Time;
     spacecraft_num=agg_SCID;
     pseudo_random_noise=agg_PRN;
     SPLAT=agg_SPLAT;
@@ -394,7 +397,7 @@ if aggregate_data
     disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
         subgeo=find(SPLAT >= LatMin & SPLAT <= LatMax & SPLON >= LonMin & SPLON >= LonMax ) ; 
-        DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
+        UTC_Time=UTC_Time(subgeo) ; DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
         pseudo_random_noise=pseudo_random_noise(subgeo) ; SPLAT=SPLAT(subgeo) ; SPLON=SPLON(subgeo) ; THETA=THETA(subgeo) ;
         GAIN=GAIN(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
         REFLECTIVITY_LINEAR_L1_L=REFLECTIVITY_LINEAR_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
@@ -403,7 +406,7 @@ if aggregate_data
         DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
     end
         if out_format=="Matlab"
-            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
+            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'UTC_Time', 'spacecraft_num', ...  
                 'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
                 'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
                  'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
@@ -418,8 +421,8 @@ if aggregate_data
             netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Name', 'Cygnsss L1a Metadata File');
     
             % Define all variables
-            var_DoY = netcdf.defVar(netcdf_cyg,'DoY','NC_DOUBLE',dimid);
-            var_SoD = netcdf.defVar(netcdf_cyg,'SoD','NC_DOUBLE',dimid);
+            var_UTC_time = netcdf.defVar(netcdf_cyg,'UTC_Time','NC_DOUBLE',dimid);
+            %var_SoD = netcdf.defVar(netcdf_cyg,'SoD','NC_DOUBLE',dimid);
             var_spacecraft_num = netcdf.defVar(netcdf_cyg,'spacecraft_num','NC_SHORT',dimid);
             var_pseudo_random_noise = netcdf.defVar(netcdf_cyg,'pseudo_random_noise','NC_SHORT',dimid);
             var_SPLAT = netcdf.defVar(netcdf_cyg,'SPLAT','NC_DOUBLE',dimid);

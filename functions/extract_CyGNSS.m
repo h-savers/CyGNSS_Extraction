@@ -16,12 +16,14 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_orbit, ...
+function [UTC_Time,DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, ...
         REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     SCID=[];                                % CYGNSS sat ID
+    UTC_Time=[];                            % UTC Time
+    Year=[];                                % Year
     SoD=[];                                 % second of the day
     DoY=[];                                 % day of the year
     PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
@@ -68,11 +70,15 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             disp('% computing  peak ratio')                       
             [pr, index] = detect_coherence_v2(pa,snr) ;
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
+            disp dayofyear
+            year=zeros(size(sp_lat)) + str2double(datechar(1:4)); % to have the same size as sp_lat also for the year, since we are interested in the UTC time
         % cat variables
             disp('% cat variables ')
             SCID=cat(1,SCID,scid(:));
+            Year=cat(1,Year,year(:));
             SoD=cat(1,SoD,ts(:));
             DoY=cat(1,DoY,dayofyear(:));
+            UTC_Time=datetime(Year, 1, 1) + days(DoY - 1) + seconds(SoD);
             PRN=cat(1,PRN, prn(:));
             SPLAT=cat(1,SPLAT, sp_lat(:));
             SPLON=cat(1,SPLON, sp_lon(:));
