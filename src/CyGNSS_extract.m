@@ -248,51 +248,51 @@ tic
 
 for ii=1:length(datelist)     % loop on all the days 
     datechar=datestr(datelist(ii),'yyyymmdd');
-    Year=datechar(1:4);
+    year=datechar(1:4);
     d=datetime(datechar,'InputFormat','yyyyMMdd');
     doy=day(d,'dayofyear');
     disp(['% now processing day ' num2str(ii) ' out of ' num2str(length(datelist)) ', DoY: ' num2str(doy) ', date: ' datestr(datelist(ii),'yyyy-mm-dd')]);
     
     %%%%%%%%%%%%%%%%%%%%%% Defining paths for each day %%%%%%%%%%%%%%%%%%%%%%%%%
-    DoY_infolderpath     = [CyGinpath, '\' , Year, '\', num2str(doy, '%03.0f'), '\'];        % Path to DoY folders containing input CyGNSS .nc data
+    DoY_infolderpath     = [CyGinpath, '\' , year, '\', num2str(doy, '%03.0f'), '\'];        % Path to DoY folders containing input CyGNSS .nc data
 
 
     %%%%%%%%%%%%%%%%%%%%%% CyGNSS data extraction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     chkCyGNSSfile=dir([DoY_infolderpath 'cyg0*.ddmi.s' datechar '*.nc']);
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
-        [DoY,SoD,spacecraft_num,pseudo_random_noise,SPLAT,SPLON,THETA,GAIN, EIRP_L1,SNR_L1_L,PHI_Initial_sp_az_orbit, ...
-            REFLECTIVITY_LINEAR_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA_L1_L,QC,noise_floor,BRCS,...
-            REFLECTIVITY_PEAK_L1_L, QC_2 , COHERENCY_RATIO, DDM_LES, POWER_RATIO]= ...
+        [dayOfYear,secondOfDay,receivingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L,spAzimuthAngleDegOrbit, ...
+            reflectivityLinear_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,NBRCS_L1_L,powerAnalogW_L1_L,QC,noise_floor,BRCS,...
+            REFLECTIVITY_PEAK_L1_L, QC_2 , coherencyRatio, DDM_LES, powerRatio]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
             disp(['% cat variables from day ', datechar ' to aggregated output file']);
-            agg_DoY=cat(1,agg_DoY,DoY(:));
-            agg_SoD=cat(1,agg_SoD,SoD(:));
-            agg_SCID=cat(1,agg_SCID,spacecraft_num(:));
-            agg_PRN=cat(1,agg_PRN, pseudo_random_noise(:));
-            agg_SPLAT=cat(1,agg_SPLAT, SPLAT(:));
-            agg_SPLON=cat(1,agg_SPLON, SPLON(:));
-            agg_THETA=cat(1,agg_THETA, THETA(:));
-            agg_GAIN=cat(1,agg_GAIN, GAIN) ; 
+            agg_DoY=cat(1,agg_DoY,dayOfYear(:));
+            agg_SoD=cat(1,agg_SoD,secondOfDay(:));
+            agg_SCID=cat(1,agg_SCID,receivingSpacecraft(:));
+            agg_PRN=cat(1,agg_PRN, pseudoRandomNoise(:));
+            agg_SPLAT=cat(1,agg_SPLAT, specularPointLat(:));
+            agg_SPLON=cat(1,agg_SPLON, specularPointLon(:));
+            agg_THETA=cat(1,agg_THETA, incidenceAngleDeg(:));
+            agg_GAIN=cat(1,agg_GAIN, rxAntennaGain_L1_L) ; 
             agg_EIRP_L1=cat(1,agg_EIRP_L1, EIRP_L1(:));
             agg_SNR_L1_L=cat(1,agg_SNR_L1_L, SNR_L1_L(:));
-            agg_PHI_Initial_sp_az_orbit=cat(1,agg_PHI_Initial_sp_az_orbit, PHI_Initial_sp_az_orbit(:));
-            agg_REFLECTIVITY_LINEAR_L1_L=cat(1,agg_REFLECTIVITY_LINEAR_L1_L,REFLECTIVITY_LINEAR_L1_L(:));
+            agg_PHI_Initial_sp_az_orbit=cat(1,agg_PHI_Initial_sp_az_orbit, spAzimuthAngleDegOrbit(:));
+            agg_REFLECTIVITY_LINEAR_L1_L=cat(1,agg_REFLECTIVITY_LINEAR_L1_L,reflectivityLinear_L1_L(:));
             agg_KURTOSIS=cat(1,agg_KURTOSIS, KURTOSIS(:));
             agg_KURTOSIS_DOPP_0=cat(1,agg_KURTOSIS_DOPP_0, KURTOSIS_DOPP_0(:)); 
             agg_TE_WIDTH=cat(1,agg_TE_WIDTH, TE_WIDTH(:)); 
-            agg_DDM_NBRCS=cat(1,agg_DDM_NBRCS, DDM_NBRCS(:)); 
-            agg_PA_L1_L=cat(1,agg_PA_L1_L, PA_L1_L(:));
+            agg_DDM_NBRCS=cat(1,agg_DDM_NBRCS, NBRCS_L1_L(:)); 
+            agg_PA_L1_L=cat(1,agg_PA_L1_L, powerAnalogW_L1_L(:));
             agg_QC=cat(1,agg_QC, QC(:)); 
             agg_NF=cat(1,agg_NF, noise_floor(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);   
             agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, REFLECTIVITY_PEAK_L1_L(:)) ; 
             agg_QC_2=cat(1,agg_QC_2, QC_2(:)); 
-            agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, COHERENCY_RATIO(:)) ;
+            agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio(:)) ;
             agg_DDM_LES=cat(1, agg_DDM_LES,DDM_LES(:)) ; 
-            agg_POWER_RATIO=cat(1, agg_POWER_RATIO,POWER_RATIO(:)) ; 
+            agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio(:)) ; 
 
 
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
@@ -309,11 +309,11 @@ for ii=1:length(datelist)     % loop on all the days
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
                     oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
-                    NOT_TOBE_USED=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
+                    notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
-                    NOT_RECOMMENDED= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
-                    GAIN > rx_gain_th & ...
-                    THETA < inc_angl_th ; % & ...
+                    notRecommended= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
+                    rxAntennaGain_L1_L > rx_gain_th & ...
+                    incidenceAngleDeg < inc_angl_th ; % & ...
                     % nsnr_dB < nsnr_th;                             
 %
        %%%%% save individual day data 
@@ -322,19 +322,19 @@ for ii=1:length(datelist)     % loop on all the days
 %
   disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
-        subgeo=find(SPLAT >= LatMin & SPLAT <= LatMax & SPLON >= LonMin & SPLON >= LonMax ) ; 
-        DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
-        pseudo_random_noise=pseudo_random_noise(subgeo) ; SPLAT=SPLAT(subgeo) ; SPLON=SPLON(subgeo) ; THETA=THETA(subgeo) ;
-        GAIN=GAIN(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
-        REFLECTIVITY_LINEAR_L1_L=REFLECTIVITY_LINEAR_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA_L1_L=PA_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
-        DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
+        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon >= LonMax ) ; 
+        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
+        pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
+        rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
+        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
+        TE_WIDTH=TE_WIDTH(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
+        DDM_LES=DDM_LES(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
     end
-            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
-                'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED', '-v7.3');
+            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
+                'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
+                'reflectivityLinear_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'NBRCS_L1_L','powerAnalogW_L1_L','QC', 'noise_floor',...
+                'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'coherencyRatio', 'DDM_LES', 'powerRatio', 'notToBeUsed', 'notRecommended', '-v7.3');
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -347,31 +347,31 @@ end
 if aggregate_data
     
     % Renaming variables
-    DoY=agg_DoY;
-    SoD=agg_SoD;
-    spacecraft_num=agg_SCID;
-    pseudo_random_noise=agg_PRN;
-    SPLAT=agg_SPLAT;
-    SPLON=agg_SPLON;
-    THETA=agg_THETA;
-    GAIN=agg_GAIN ; 
+    dayOfYear=agg_DoY;
+    secondOfDay=agg_SoD;
+    receivingSpacecraft=agg_SCID;
+    pseudoRandomNoise=agg_PRN;
+    specularPointLat=agg_SPLAT;
+    specularPointLon=agg_SPLON;
+    incidenceAngleDeg=agg_THETA;
+    rxAntennaGain_L1_L=agg_GAIN ; 
     EIRP_L1=agg_EIRP_L1;
     SNR_L1_L=agg_SNR_L1_L;
-    PHI_Initial_sp_az_orbit=agg_PHI_Initial_sp_az_orbit;
-    REFLECTIVITY_LINEAR_L1_L=agg_REFLECTIVITY_LINEAR_L1_L;
+    spAzimuthAngleDegOrbit=agg_PHI_Initial_sp_az_orbit;
+    reflectivityLinear_L1_L=agg_REFLECTIVITY_LINEAR_L1_L;
     KURTOSIS=agg_KURTOSIS;
     KURTOSIS_DOPP_0=agg_KURTOSIS_DOPP_0; 
     TE_WIDTH=agg_TE_WIDTH; 
-    DDM_NBRCS=agg_DDM_NBRCS; 
-    PA_L1_L=agg_PA_L1_L;
+    NBRCS_L1_L=agg_DDM_NBRCS; 
+    powerAnalogW_L1_L=agg_PA_L1_L;
     QC=agg_QC; 
     noise_floor=agg_NF;
     BRCS=agg_BRCS;   
     REFLECTIVITY_PEAK_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
     QC_2=agg_QC_2; 
-    COHERENCY_RATIO=agg_COHERENCY_RATIO ; 
+    coherencyRatio=agg_COHERENCY_RATIO ; 
     DDM_LES=agg_DDM_LES ; 
-    POWER_RATIO=agg_POWER_RATIO ; 
+    powerRatio=agg_POWER_RATIO ; 
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
                         % 17 (low_confidence_gps_eirp_estimate)
@@ -383,29 +383,29 @@ if aggregate_data
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
                     oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
-                    NOT_TOBE_USED=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
+                    notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
-                    NOT_RECOMMENDED=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
-                    GAIN < rx_gain_th | ...
-                    THETA > inc_angl_th) ; % & ...
+                    notRecommended=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
+                    rxAntennaGain_L1_L < rx_gain_th | ...
+                    incidenceAngleDeg > inc_angl_th) ; % & ...
                     % nsnr_dB < nsnr_th;                             
     %
     % Saving aggregated data
     disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
-        subgeo=find(SPLAT >= LatMin & SPLAT <= LatMax & SPLON >= LonMin & SPLON >= LonMax ) ; 
-        DoY=DoY(subgeo) ; SoD=SoD(subgeo) ; spacecraft_num=spacecraft_num(subgeo) ; 
-        pseudo_random_noise=pseudo_random_noise(subgeo) ; SPLAT=SPLAT(subgeo) ; SPLON=SPLON(subgeo) ; THETA=THETA(subgeo) ;
-        GAIN=GAIN(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; PHI_Initial_sp_az_orbit=PHI_Initial_sp_az_orbit(subgeo) ;
-        REFLECTIVITY_LINEAR_L1_L=REFLECTIVITY_LINEAR_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; DDM_NBRCS=DDM_NBRCS(subgeo) ; PA_L1_L=PA_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  COHERENCY_RATIO=COHERENCY_RATIO(subgeo) ;
-        DDM_LES=DDM_LES(subgeo) ; POWER_RATIO=POWER_RATIO(subgeo) ; NOT_TOBE_USED=NOT_TOBE_USED(subgeo) ; NOT_RECOMMENDED=NOT_RECOMMENDED(subgeo) ;
+        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon >= LonMax ) ; 
+        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
+        pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
+        rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
+        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
+        TE_WIDTH=TE_WIDTH(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
+        DDM_LES=DDM_LES(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
     end
-        save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'Year', 'DoY', 'SoD', 'spacecraft_num', ...  
-                'pseudo_random_noise', 'SPLAT', 'SPLON', 'THETA', 'GAIN', 'EIRP_L1', 'SNR_L1_L', 'PHI_Initial_sp_az_orbit', ...
-                'REFLECTIVITY_LINEAR_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'DDM_NBRCS','PA_L1_L','QC', 'noise_floor',...
-                 'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'COHERENCY_RATIO', 'DDM_LES', 'POWER_RATIO', 'NOT_TOBE_USED', 'NOT_RECOMMENDED','-v7.3');
+        save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
+                'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
+                'reflectivityLinear_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'NBRCS_L1_L','powerAnalogW_L1_L','QC', 'noise_floor',...
+                 'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'coherencyRatio', 'DDM_LES', 'powerRatio', 'notToBeUsed', 'notRecommended','-v7.3');
         
 %
 end
