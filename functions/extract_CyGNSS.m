@@ -64,10 +64,10 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
                 reflectivity_peak, qc_2, coherency_ratio, ddm_les, raw_counts]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge')                     
-            TE_width=computeTE(pa,delay_vector,Power_threshold);  
+            TE_width=computeTE(double(pa),delay_vector,Power_threshold);  
             disp('% computing  peak ratio')                       
 %             [pr, index] = detect_coherence_v2(pa,snr) ;
-            [pr, index] = detect_coherence_v2(raw_counts,snr) ;
+            [pr, index] = detect_coherence_v2(single(raw_counts),snr) ;
 
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
         % cat variables
