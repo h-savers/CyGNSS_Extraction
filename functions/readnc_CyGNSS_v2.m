@@ -3,9 +3,9 @@
 % Reflectivity, Kurtosis and Kurtosis zero-Doppler.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain, ...
+function [sp_lat,sp_lon,theta,scid,strans,ts,nst_full,prn,azimuth_angle,phi_Initial_sp_az_orbit,sp_rx_gain, ...
     eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,Reflectivity_linear,Kurtosis,...
-    Kurtosis_dopp0, brcs, reflectivity_peak, qc_2, coherency_ratio, ddm_les]= ...
+    Kurtosis_dopp0, brcs, reflectivity_peak, receivingantenna, qc_2, coherencyratio, ddm_les]= ...
     readnc_CyGNSS(inpath,filename,lambda,Doppler_bins,savespace)
 
      % Reading data
@@ -32,10 +32,17 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      scid=double(scid).*ones(size(sp_lat));     % spacecraft id
      % scid=double(ncread(toread,'spacecraft_num')).*ones(size(sp_lat));   % spacecraft id ol version
      
+     varID=netcdf.inqVarID(ncid, 'sv_num')  ;
+     strans=netcdf.getVar(ncid,varID) ; 
+
      varID=netcdf.inqVarID(ncid, 'prn_code')  ;
      prn=double(netcdf.getVar(ncid,varID)) ;                               % full prn 
      % prn=ncread(toread,'prn_code');                                      % full prn old version 
      
+     varID=netcdf.inqVarID(ncid, 'sp_az_orbit')  ;
+     azimuth_angle=double(netcdf.getVar(ncid,varID)) ;                     % The mean of the orbit frame azimuth angles of the specular points of the DDMs
+     % prn=ncread(toread,'prn_code');                                      % full prn old version 
+
      varID=netcdf.inqVarID(ncid, 'ddm_timestamp_utc')  ;
      ts=netcdf.getVar(ncid,varID) ; 
      ts=repmat(ts',4,1);                                                   % time in seconds since 2017-03-27 00:00:00.999261529
@@ -49,7 +56,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
 
      varID=netcdf.inqVarID(ncid, 'sp_inc_angle')  ;
      theta=double(netcdf.getVar(ncid,varID)) ;                             % Incidence angle
-     % theta=ncread(toread,'sp_inc_angle');                                % Incidence angle old version 
+     % incidenceAngleDeg=ncread(toread,'sp_inc_angle');                                % Incidence angle old version 
 
      varID=netcdf.inqVarID(ncid, 'sp_az_orbit')  ;
      phi_Initial_sp_az_orbit=double(netcdf.getVar(ncid,varID)) ;           % Azimuth angle
@@ -88,13 +95,16 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      % brcs=ncread(toread,'brcs');                                         % added by Hamed to save full ddm old version
 
      varID=netcdf.inqVarID(ncid, 'reflectivity_peak')  ;
-     reflectivity_peak=double(netcdf.getVar(ncid,varID)) ;                 % Peak linear reflectivity
+     reflectivity_peak=double(netcdf.getVar(ncid,varID)) ;                 % Peak linear reflectivityc
+
+     varID=netcdf.inqVarID(ncid, 'ddm_ant')  ;
+     receivingantenna=double(netcdf.getVar(ncid,varID)) ;                 % Reading receiving Antenna pararmeters
 
      disp('% reading quality flags ')
 
      varID=netcdf.inqVarID(ncid, 'quality_flags')  ;
      qc=netcdf.getVar(ncid,varID) ;                                        % quality flag bits
-     % qc=ncread(toread,'quality_flags');                                  % quality flag bits old version
+     % qualityControlFlags=ncread(toread,'quality_flags');                                  % quality flag bits old version
      
      varID=netcdf.inqVarID(ncid, 'quality_flags_2')  ;
      qc_2=netcdf.getVar(ncid,varID) ;                                        % quality flag bits number 2
@@ -108,7 +118,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      disp('% DDM shape parameters')
 
      varID=netcdf.inqVarID(ncid, 'coherency_ratio')  ;
-     coherency_ratio=double(netcdf.getVar(ncid,varID)) ;                   % Estimation of the ratio of received power between the central bins and periphery bins of the raw_counts DDM after the elimination of noise bins [4]. A higher ratio is more indicative of signal coherence.'
+     coherencyratio=double(netcdf.getVar(ncid,varID)) ;                   % Estimation of the ratio of received power between the central bins and periphery bins of the raw_counts DDM after the elimination of noise bins [4]. A higher ratio is more indicative of signal coherence.'
 
      varID=netcdf.inqVarID(ncid, 'ddm_les')  ;
      ddm_les=double(netcdf.getVar(ncid,varID)) ;                           % Leading edge slope
@@ -123,9 +133,11 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              sp_lat=sp_lat(pos);
              sp_lon=sp_lon(pos);
              scid=scid(pos);
+             strans=strans(pos);
              ts=ts(pos);
              nst_full=nst_full(pos);
              prn=prn(pos);
+             azimuth_angle=azimuth_angle(pos);
              theta=theta(pos);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(pos);
              sp_rx_gain=sp_rx_gain(pos);
@@ -142,8 +154,9 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              brcs=brcs(:, :, pos);                                         % added by Hamed to save full ddm
 
              reflectivity_peak=reflectivity_peak(pos);
+             receivingantenna=receivingantenna(pos);
              qc_2=qc_2(pos);
-             coherency_ratio=coherency_ratio(pos);
+             coherencyratio=coherencyratio(pos);
              ddm_les=ddm_les(pos);
 
 
@@ -151,9 +164,11 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              sp_lat=sp_lat(:);
              sp_lon=sp_lon(:);
              scid=scid(:);
+             strans=strans(:);
              ts=ts(:);
              nst_full=nst_full(:);
              prn=prn(:);
+             azimuth_angle=azimuth_angle(:);
              theta=theta(:);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(:);
              sp_rx_gain=sp_rx_gain(:);
@@ -169,8 +184,9 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
 
              brcs=brcs(:, :, :);                                         % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
+             receivingantenna=receivingantenna(:);
              qc_2=qc_2(:);
-             coherency_ratio=coherency_ratio(:);
+             coherencyratio=coherencyratio(:);
              ddm_les=ddm_les(:);
 
 
