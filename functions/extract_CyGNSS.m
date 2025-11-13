@@ -18,7 +18,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, ...
-        REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR]= ...
+        REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     SCID=[];                                % CYGNSS sat ID
@@ -45,6 +45,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
     REFLECTIVITY_LINEAR=[];                 % Reflectivity
 
     BRCS=[];                                % added by Hamed to save full ddm
+    PSEUDOSTD=[] ;                          % pseudo standard deviation of DDM assumed as a bivariate pdf
 
 %%%%%%%%%%%%%%%%%%%%% added by Mauro
     REFLECTIVITY_PEAK=[] ;                  % Reflectivity in lienar units from L1b producxt                  
@@ -68,6 +69,9 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             disp('% computing  peak ratio')                       
 %             [pr, index] = detect_coherence_v2(pa,snr) ;
             [pr, index] = detect_coherence_v2(single(raw_counts),snr) ;
+            disp('% computing pseudo standard deviation of DDM')
+            pseudostd=ddm_pseudovariance(pa) ;     %      
+
 
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
         % cat variables
@@ -84,7 +88,7 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             EIRP=cat(1,EIRP, eirp(:));
             SNR=cat(1,SNR, snr(:));
             QC=cat(1,QC, qc(:)); 
-            PA=cat(1,PA, reflectivity_linear(:));
+            PA=cat(3,PA, pa);
             NF=cat(1,NF, nf(:));
             DDM_NBRCS=cat(1,DDM_NBRCS, ddm_nbrcs(:)); 
             KURTOSIS=cat(1,KURTOSIS, Kurtosis(:));
@@ -102,6 +106,8 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
             DDM_LES=cat(1,DDM_LES,ddm_les);    
             PR=cat(1,PR, pr) ; 
+            PSEUDOSTD=cat(1,PSEUDOSTD, pseudostd) ; 
+
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
             disp(['% WARNING: cyg0' num2str(jj) ' satellite missing for the date ' datechar])

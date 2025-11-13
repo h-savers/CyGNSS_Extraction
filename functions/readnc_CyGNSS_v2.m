@@ -18,7 +18,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      disp('% reading lat/lon')
      
      varID=netcdf.inqVarID(ncid, 'sp_lat')  ;
-     sp_lat= (netcdf.getVar(ncid,varID)) ;                            % Latitude   
+     sp_lat= (netcdf.getVar(ncid,varID)) ;                                 % Latitude   
 
      varID=netcdf.inqVarID(ncid, 'sp_lon')  ;
      sp_lon= (netcdf.getVar(ncid,varID)) ;
@@ -33,7 +33,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      % scid=double(ncread(toread,'spacecraft_num')).*ones(size(sp_lat));   % spacecraft id ol version
      
      varID=netcdf.inqVarID(ncid, 'prn_code')  ;
-     prn= (netcdf.getVar(ncid,varID)) ;                               % full prn 
+     prn= (netcdf.getVar(ncid,varID)) ;                                    % full prn 
      % prn=ncread(toread,'prn_code');                                      % full prn old version 
      
      varID=netcdf.inqVarID(ncid, 'ddm_timestamp_utc')  ;
@@ -44,51 +44,51 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      disp('% reading observables ')
      varID=netcdf.inqVarID(ncid, 'nst_att_status')  ;
      nst_full=netcdf.getVar(ncid,varID) ; 
-     nst_full= (repmat(nst_full',4,1)) ;                              % attitude flag (not used over land)
+     nst_full= (repmat(nst_full',4,1)) ;                                   % attitude flag (not used over land)
      % nst_full=repmat(ncread(toread,'nst_att_status')',4,1);              % attitude flag (not used over land) old version
 
      varID=netcdf.inqVarID(ncid, 'sp_inc_angle')  ;
-     theta= (netcdf.getVar(ncid,varID)) ;                             % Incidence angle
+     theta= (netcdf.getVar(ncid,varID)) ;                                  % Incidence angle
      % theta=ncread(toread,'sp_inc_angle');                                % Incidence angle old version 
 
      varID=netcdf.inqVarID(ncid, 'sp_az_orbit')  ;
-     phi_Initial_sp_az_orbit= (netcdf.getVar(ncid,varID)) ;           % Azimuth angle
+     phi_Initial_sp_az_orbit= (netcdf.getVar(ncid,varID)) ;                % Azimuth angle
      %phi_Initial_sp_az_orbit=ncread(toread,'sp_az_orbit');                % Azimuth angle old version 
      
      varID=netcdf.inqVarID(ncid, 'sp_rx_gain')  ;
-     sp_rx_gain= (netcdf.getVar(ncid,varID)) ;                        % receiver gain [dB]
+     sp_rx_gain= (netcdf.getVar(ncid,varID)) ;                             % receiver gain [dB]
      %gain=ncread(toread,'sp_rx_gain');                                    % gain [dB] old version 
      
      varID=netcdf.inqVarID(ncid, 'gps_eirp')  ;
-     eirp= (netcdf.getVar(ncid,varID)) ;                              % eirp [dB]
+     eirp= (netcdf.getVar(ncid,varID)) ;                                   % eirp [dB]
      %eirp=ncread(toread,'gps_eirp');                                      % gps eirp old version         
 
      varID=netcdf.inqVarID(ncid, 'ddm_snr')  ;
-     snr= (netcdf.getVar(ncid,varID)) ;                               % snr of reflected signal [dB]
+     snr= (netcdf.getVar(ncid,varID)) ;                                    % snr of reflected signal [dB]
      %snr=ncread(toread,'ddm_snr');                                        % snr of reflected signal [dB] old version        
 
      varID=netcdf.inqVarID(ncid, 'ddm_noise_floor')  ;
-     nf= (netcdf.getVar(ncid,varID)) ;                                % noise floor from uncalibrated DDM of count
+     nf= (netcdf.getVar(ncid,varID)) ;                                     % noise floor from uncalibrated DDM of count
      %nf=ncread(toread,'ddm_noise_floor');                                 % noise floor from uncalibrated DDM of counts old version  
 
      varID=netcdf.inqVarID(ncid, 'rx_to_sp_range')  ;
-     rxrange= (netcdf.getVar(ncid,varID)) ;                           % rx range
+     rxrange= (netcdf.getVar(ncid,varID)) ;                                % rx range
      %rxrange=ncread(toread,'rx_to_sp_range');                             % rx range old version 
 
      varID=netcdf.inqVarID(ncid, 'tx_to_sp_range')  ;
-     txrange= (netcdf.getVar(ncid,varID)) ;                           % tx range
+     txrange= (netcdf.getVar(ncid,varID)) ;                                % tx range
      %txrange=ncread(toread,'tx_to_sp_range');                             % tx range old version 
      
      varID=netcdf.inqVarID(ncid, 'ddm_nbrcs')  ;
-     ddm_nbrcs= (netcdf.getVar(ncid,varID)) ;                         % Normalized BRCS
+     ddm_nbrcs= (netcdf.getVar(ncid,varID)) ;                              % Normalized BRCS
      %ddm_nbrcs=ncread(toread,'ddm_nbrcs');                                % Normalized BRCS old version 
 
      varID=netcdf.inqVarID(ncid, 'brcs')  ;
-     brcs= (netcdf.getVar(ncid,varID)) ;                              % added by Hamed to save full ddm
+     brcs= (netcdf.getVar(ncid,varID)) ;                                   % added by Hamed to save full ddm
      % brcs=ncread(toread,'brcs');                                         % added by Hamed to save full ddm old version
 
      varID=netcdf.inqVarID(ncid, 'reflectivity_peak')  ;
-     reflectivity_peak= (netcdf.getVar(ncid,varID)) ;                 % Peak linear reflectivity
+     reflectivity_peak= (netcdf.getVar(ncid,varID)) ;                      % Peak linear reflectivity
 
      disp('% reading quality flags ')
 
@@ -97,24 +97,24 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      % qc=ncread(toread,'quality_flags');                                  % quality flag bits old version
      
      varID=netcdf.inqVarID(ncid, 'quality_flags_2')  ;
-     qc_2=netcdf.getVar(ncid,varID) ;                                        % quality flag bits number 2
+     qc_2=netcdf.getVar(ncid,varID) ;                                      % quality flag bits number 2
 
      disp('% reading analog power')
 
      varID=netcdf.inqVarID(ncid, 'power_analog')  ;
-     pa= (netcdf.getVar(ncid,varID)) ;                                % power analog is the DDM in Watt unit
+     pa= (netcdf.getVar(ncid,varID)) ;                                     % power analog is the DDM in Watt unit
      % pa=ncread(toread,'power_analog');
 
      varID=netcdf.inqVarID(ncid, 'raw_counts')  ; 
-     raw_counts= (netcdf.getVar(ncid,varID)) ;                        % DDM bin raw counts
+     raw_counts= (netcdf.getVar(ncid,varID)) ;                             % DDM bin raw counts
 
      disp('% DDM shape parameters')
 
      varID=netcdf.inqVarID(ncid, 'coherency_ratio')  ;
-     coherency_ratio= (netcdf.getVar(ncid,varID)) ;                   % Estimation of the ratio of received power between the central bins and periphery bins of the raw_counts DDM after the elimination of noise bins [4]. A higher ratio is more indicative of signal coherence.'
+     coherency_ratio= (netcdf.getVar(ncid,varID)) ;                        % Estimation of the ratio of received power between the central bins and periphery bins of the raw_counts DDM after the elimination of noise bins [4]. A higher ratio is more indicative of signal coherence.'
 
      varID=netcdf.inqVarID(ncid, 'ddm_les')  ;
-     ddm_les= (netcdf.getVar(ncid,varID)) ;                           % Leading edge slope
+     ddm_les= (netcdf.getVar(ncid,varID)) ;                                % Leading edge slope
 
      lf=(bitget(qc,11));                                                   % SP over land flag
      maxpa=squeeze(max(pa(1:size(pa,1),1:size(pa,2),:,:)));
@@ -173,7 +173,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              raw_counts=reshape(raw_counts(:,:,:,:),size(raw_counts,1),size(raw_counts,2),size(raw_counts,3)*size(raw_counts,4));
 
 
-             brcs=brcs(:, :, :);                                         % added by Hamed to save full ddm
+             brcs=brcs(:, :, :);                                           % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
              qc_2=qc_2(:);
              coherency_ratio=coherency_ratio(:);
@@ -201,7 +201,5 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      c=sum(Doppler_bins.*Dopp_norm); 
      var=sum(Dopp_norm.*((Doppler_bins-c).^2)) ;
      Kurtosis_dopp0=squeeze(sum(Dopp_norm.*(power(Doppler_bins-c,4))./power(var,2)));
-
-     %      
-%      disp('% Done ')  
+%    disp('% Done ')  
 end

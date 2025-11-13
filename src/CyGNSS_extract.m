@@ -237,6 +237,7 @@ if aggregate_data
     agg_COHERENCY_RATIO=[] ;                    % Coherency ratio from CyGNSS L1b products
     agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
     agg_POWER_RATIO=[] ;                        % Power raio from Mohammad M. Al-Khaldi et al., 2021
+    agg_PSEUDOSTD=[] ; 
 
 else
     disp('% Processing each day separately and saving individual output files');
@@ -262,8 +263,8 @@ for ii=1:length(datelist)     % loop on all the days
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
         [dayOfYear,secondOfDay,receivingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L,spAzimuthAngleDegOrbit, ...
-            reflectivityLinear_L1_L,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,NBRCS_L1_L,powerAnalogW_L1_L,QC,noise_floor,BRCS,...
-            REFLECTIVITY_PEAK_L1_L, QC_2 , coherencyRatio, DDM_LES, powerRatio]= ...
+            reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags,noise_floor,BRCS,...
+            reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -280,19 +281,20 @@ for ii=1:length(datelist)     % loop on all the days
             agg_SNR_L1_L=cat(1,agg_SNR_L1_L, SNR_L1_L(:));
             agg_PHI_Initial_sp_az_orbit=cat(1,agg_PHI_Initial_sp_az_orbit, spAzimuthAngleDegOrbit(:));
             agg_REFLECTIVITY_LINEAR_L1_L=cat(1,agg_REFLECTIVITY_LINEAR_L1_L,reflectivityLinear_L1_L(:));
-            agg_KURTOSIS=cat(1,agg_KURTOSIS, KURTOSIS(:));
-            agg_KURTOSIS_DOPP_0=cat(1,agg_KURTOSIS_DOPP_0, KURTOSIS_DOPP_0(:)); 
-            agg_TE_WIDTH=cat(1,agg_TE_WIDTH, TE_WIDTH(:)); 
+            agg_KURTOSIS=cat(1,agg_KURTOSIS, kurtosisDDM(:));
+            agg_KURTOSIS_DOPP_0=cat(1,agg_KURTOSIS_DOPP_0, kurtosisDopp0(:)); 
+            agg_TE_WIDTH=cat(1,agg_TE_WIDTH, teWidth(:)); 
             agg_DDM_NBRCS=cat(1,agg_DDM_NBRCS, NBRCS_L1_L(:)); 
             agg_PA_L1_L=cat(1,agg_PA_L1_L, powerAnalogW_L1_L(:));
-            agg_QC=cat(1,agg_QC, QC(:)); 
+            agg_QC=cat(1,agg_QC, qualityFlags(:)); 
             agg_NF=cat(1,agg_NF, noise_floor(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);   
-            agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, REFLECTIVITY_PEAK_L1_L(:)) ; 
-            agg_QC_2=cat(1,agg_QC_2, QC_2(:)); 
+            agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, reflectivityPeak_L1_L(:)) ; 
+            agg_QC_2=cat(1,agg_QC_2, qualityFlags_2(:)); 
             agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio(:)) ;
-            agg_DDM_LES=cat(1, agg_DDM_LES,DDM_LES(:)) ; 
+            agg_DDM_LES=cat(1, agg_DDM_LES,ddmLes(:)) ; 
             agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio(:)) ; 
+            agg_PSEUDOSTD=cat(1, agg_PSEUDOSTD, pseudoStd) ; 
 
 
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
@@ -304,11 +306,11 @@ for ii=1:length(datelist)     % loop on all the days
                         % 22 (gps_pvt_sp3_error)
                         % 28 (low_quality_gps_ant_knowledge)
                         % 30 (anomalous_sampling_period)
-                    oqf1=(bitget(QC,17) | bitget(QC,22) | bitget(QC,28) | bitget(QC,30));
+                    oqf1=(bitget(qualityFlags,17) | bitget(qualityFlags,22) | bitget(qualityFlags,28) | bitget(qualityFlags,30));
                     % Quality flag 2 - currently using bits:
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
-                    oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
+                    oqf2=(bitget(qualityFlags_2,12) | bitget(qualityFlags_2,18));
                     notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
@@ -322,19 +324,19 @@ for ii=1:length(datelist)     % loop on all the days
 %
   disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
-        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon >= LonMax ) ; 
+        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon <= LonMax ) ; 
         dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
-        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
-        DDM_LES=DDM_LES(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
+        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
+        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
+        ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
     end
             save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
                 'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
-                'reflectivityLinear_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'NBRCS_L1_L','powerAnalogW_L1_L','QC', 'noise_floor',...
-                'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'coherencyRatio', 'DDM_LES', 'powerRatio', 'notToBeUsed', 'notRecommended', '-v7.3');
+                'reflectivityLinear_L1_L', 'kurtosisDDM', 'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L','qualityFlags', 'noise_floor',...
+                'reflectivityPeak_L1_L', 'qualityFlags_2',  'coherencyRatio', 'ddmLes', 'powerRatio', 'notToBeUsed', 'notRecommended', 'pseudoStd', '-v7.3');
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -359,30 +361,31 @@ if aggregate_data
     SNR_L1_L=agg_SNR_L1_L;
     spAzimuthAngleDegOrbit=agg_PHI_Initial_sp_az_orbit;
     reflectivityLinear_L1_L=agg_REFLECTIVITY_LINEAR_L1_L;
-    KURTOSIS=agg_KURTOSIS;
-    KURTOSIS_DOPP_0=agg_KURTOSIS_DOPP_0; 
-    TE_WIDTH=agg_TE_WIDTH; 
+    kurtosisDDM=agg_KURTOSIS;
+    kurtosisDopp0=agg_KURTOSIS_DOPP_0; 
+    teWidth=agg_TE_WIDTH; 
     NBRCS_L1_L=agg_DDM_NBRCS; 
     powerAnalogW_L1_L=agg_PA_L1_L;
-    QC=agg_QC; 
+    qualityFlags=agg_QC; 
     noise_floor=agg_NF;
     BRCS=agg_BRCS;   
-    REFLECTIVITY_PEAK_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
-    QC_2=agg_QC_2; 
+    reflectivityPeak_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
+    qualityFlags_2=agg_QC_2; 
     coherencyRatio=agg_COHERENCY_RATIO ; 
-    DDM_LES=agg_DDM_LES ; 
+    ddmLes=agg_DDM_LES ; 
     powerRatio=agg_POWER_RATIO ; 
+    pseudoStd=agg_PSEUDOSTD ; 
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
                         % 17 (low_confidence_gps_eirp_estimate)
                         % 22 (gps_pvt_sp3_error)
                         % 28 (low_quality_gps_ant_knowledge)
                         % 30 (anomalous_sampling_period)
-                    oqf1=(bitget(QC,17) | bitget(QC,22) | bitget(QC,28) | bitget(QC,30));
+                    oqf1=(bitget(qualityFlags,17) | bitget(qualityFlags,22) | bitget(qualityFlags,28) | bitget(qualityFlags,30));
                         % Quality flag 2 - currently using bits:
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
-                    oqf2=(bitget(QC_2,12) | bitget(QC_2,18));
+                    oqf2=(bitget(qualityFlags_2,12) | bitget(qualityFlags_2,18));
                     notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
@@ -393,19 +396,19 @@ if aggregate_data
     % Saving aggregated data
     disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
-        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon >= LonMax ) ; 
+        subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon <= LonMax ) ; 
         dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
-        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; KURTOSIS=KURTOSIS(subgeo) ; KURTOSIS_DOPP_0=KURTOSIS_DOPP_0(subgeo) ; 
-        TE_WIDTH=TE_WIDTH(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; QC=QC(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        REFLECTIVITY_PEAK_L1_L=REFLECTIVITY_PEAK_L1_L(subgeo) ; QC_2=QC_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
-        DDM_LES=DDM_LES(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
+        reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
+        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
+        ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
     end
         save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
                 'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
-                'reflectivityLinear_L1_L', 'KURTOSIS', 'KURTOSIS_DOPP_0', 'TE_WIDTH', 'NBRCS_L1_L','powerAnalogW_L1_L','QC', 'noise_floor',...
-                 'REFLECTIVITY_PEAK_L1_L', 'QC_2',  'coherencyRatio', 'DDM_LES', 'powerRatio', 'notToBeUsed', 'notRecommended','-v7.3');
+                'reflectivityLinear_L1_L', 'kurtosisDDM', 'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L','qualityFlags', 'noise_floor',...
+                 'reflectivityPeak_L1_L', 'qualityFlags_2',  'coherencyRatio', 'ddmLes', 'powerRatio', 'notToBeUsed', 'notRecommended','pseudoStd','-v7.3');
         
 %
 end

@@ -6,7 +6,7 @@
 %
 %   The method is based on https://doi.org/10.1109/TGRS.2020.3009784
 
-function [pr, index] = detect_coherence(DDM,SNR)
+function [pr, index] = detect_coherence_v2(DDM,SNR)
 
 %Pre-processing
 if size(DDM,1)~=11 | size(DDM,2)~=17
@@ -16,9 +16,11 @@ end
 % DDM=reshape(DDM',[11,17,N]);
 
 %Noise-exclusion threshold in Fig.2 of the reference paper
-x=0:5:30;
-y=[70 40 15 7.5 4 2 0];
-ex_noise=polyval(polyfit(x,y,3),SNR)/100;
+% x=[2,5,10,15,20,25,30] ;
+% y=[70 40 15 7.5 4 2 0];
+% ex_noise=polyval(polyfit(x,y,3),SNR)/100;
+ex_noise = 1.04476470976845 - 0.190687990638969 * SNR + ...
+    0.0148392160619474 * SNR.^2 - 0.000577715875348386 * SNR.^3 + 1.09591724727541e-05 * SNR.^4 - 8.04610904987129e-08 * SNR.^5 ; 
 
 %Find the indices of the sharp peak in DDMs
 [ind_dop,ind_tau,cin,cout]=deal(zeros(N,1));
