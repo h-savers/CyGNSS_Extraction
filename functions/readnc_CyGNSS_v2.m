@@ -34,6 +34,10 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      
      varID=netcdf.inqVarID(ncid, 'prn_code')  ;
      prn= (netcdf.getVar(ncid,varID)) ;                                    % full prn 
+     % prn=ncread(toread,'prn_code');                                      % full prn old version
+
+     varID=netcdf.inqVarID(ncid, 'sp_az_orbit')  ;
+     azimuth_angle=(netcdf.getVar(ncid,varID)) ;                     % The mean of the orbit frame azimuth angles of the specular points of the DDMs
      % prn=ncread(toread,'prn_code');                                      % full prn old version 
      
      varID=netcdf.inqVarID(ncid, 'ddm_timestamp_utc')  ;
