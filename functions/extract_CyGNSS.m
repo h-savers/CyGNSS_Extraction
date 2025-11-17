@@ -80,6 +80,8 @@ function [DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN, EIRP,SNR,PHI_Initial_sp_az_or
             SoD=cat(1,SoD,ts(:));
             DoY=cat(1,DoY,dayofyear(:));
             PRN=cat(1,PRN, prn(:));
+            UTC_Time=datetime(Year, 1, 1) + days(DoY - 1) + seconds(SoD);
+            pseudoRandomNoise=cat(1,pseudoRandomNoise, prn(:));
             SPLAT=cat(1,SPLAT, sp_lat(:));
             SPLON=cat(1,SPLON, sp_lon(:));
             THETA=cat(1,THETA, theta(:));

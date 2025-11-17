@@ -90,6 +90,25 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      varID=netcdf.inqVarID(ncid, 'reflectivity_peak')  ;
      reflectivity_peak= (netcdf.getVar(ncid,varID)) ;                      % Peak linear reflectivity
 
+     varID=netcdf.inqVarID(ncid, 'ddm_ant')  ;
+     receivingantenna=(netcdf.getVar(ncid,varID)) ;                 % Reading receiving Antenna pararmeters
+
+     disp('% computing the azimuth angle at specular point with respect to North ')
+
+     varID=netcdf.inqVarID(ncid, 'sc_pos_x')  ;
+     sc_pos_x=single(netcdf.getVar(ncid,varID)) ;  
+     varID=netcdf.inqVarID(ncid, 'sc_pos_y')  ;
+     sc_pos_y=single(netcdf.getVar(ncid,varID)) ;  
+     varID=netcdf.inqVarID(ncid, 'sc_pos_z')  ;
+     sc_pos_z=single(netcdf.getVar(ncid,varID)) ;  
+     varID=netcdf.inqVarID(ncid, 'sc_vel_x')  ;
+     sc_vel_x=single(netcdf.getVar(ncid,varID)) ;  
+     varID=netcdf.inqVarID(ncid, 'sc_vel_y')  ;
+     sc_vel_y=single(netcdf.getVar(ncid,varID)) ;  
+     varID=netcdf.inqVarID(ncid, 'sc_vel_z')  ;
+     sc_vel_z=single(netcdf.getVar(ncid,varID)) ;          
+     [sp_azimuth_angle_deg_north]=compute_azimuth_angle(sc_pos_x,sc_pos_y,sc_pos_z,sc_vel_x,sc_vel_y,sc_vel_z,azimuth_angle);
+     
      disp('% reading quality flags ')
 
      varID=netcdf.inqVarID(ncid, 'quality_flags')  ;
@@ -158,6 +177,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              ts=ts(:);
              nst_full=nst_full(:);
              prn=prn(:);
+             azimuth_angle=azimuth_angle(:);
              theta=theta(:);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(:);
              sp_rx_gain=sp_rx_gain(:);
@@ -171,10 +191,12 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              peak=peak(:);
              pa=reshape(pa(:,:,:,:),size(pa,1),size(pa,2),size(pa,3)*size(pa,4));
              raw_counts=reshape(raw_counts(:,:,:,:),size(raw_counts,1),size(raw_counts,2),size(raw_counts,3)*size(raw_counts,4));
+             sp_azimuth_angle_deg_north=sp_azimuth_angle_deg_north(:);
 
 
              brcs=brcs(:, :, :);                                           % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
+             receivingantenna=receivingantenna(:);
              qc_2=qc_2(:);
              coherency_ratio=coherency_ratio(:);
              ddm_les=ddm_les(:);

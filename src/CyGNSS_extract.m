@@ -39,7 +39,7 @@ switch mode
 Answer{1}= char(Taskname) ;         Answer{2}=char(string(initdate)) ;
 Answer{3}=char(enddate)  ;          Answer{4}= char(string(savespace)) ;
 Answer{5}=char(CyGinpath)  ;        Answer{6}= char(string(CyGoutpath)) ;
-Answer{7}= char(string(logpath)) ;
+Answer{7}=char(string(logpath)) ;
 Answer{8}=char(string(LatMin))  ;   Answer{9}= char(string(LatMax)) ;
 Answer{10}=char(string(LonMin))  ;  Answer{11}=char(string(LonMax)) ; 
 Answer{12}=char(aggregate_data) ;   Answer{13}=char(out_format) ; 
@@ -84,6 +84,26 @@ LonMin=Answer{10};
 LonMax=Answer{11};
 aggregate_data=Answer{12};
 out_format=Answer{13};
+
+% ----- Added by Federico P. ----- %
+
+% Check if the output file format has been correctly insert  
+if ~contains(out_format, 'matlab', 'IgnoreCase', true) || ...
+   ~contains(out_format, 'netcdf', 'IgnoreCase', true)
+else
+    disp('Output file format is not supported, please check the input');
+end
+% Check if the "Filter out field" has been correclt insert
+if strcmpi(savespace,"Yes")
+    data_coverage='land';
+elseif strcmpi(savespace,"No")
+    data_coverage='global';
+else
+    disp('The Filter out field was filled in incorrectly. Please enter either Yes or No')
+end
+
+% ----- End ----- %
+
 % init_SM_Day=datetime(Answer{2}) ; 
 % final_SM_Day=datetime(Answer{3}) ; 
 % write the new configuration file
@@ -110,8 +130,6 @@ LonMin=double(string(LonMin)) ; LonMax=double(string(LonMax)) ;
     snr_th, sp_rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath);
 % end switch between GUI and input
 end
-
-
 
 
 % clear all
@@ -210,8 +228,10 @@ if aggregate_data
     disp(['% Processing data from ' daterangechar ' and saving in a single output file'])
 
     agg_SCID=[];                                % CYGNSS sat ID
+    agg_UTC_Time=[];
     agg_SoD=[];                                 % second of the day
     agg_DoY=[];                                 % day of the year
+    agg_transmittingSpacecraft=[];
     agg_PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
     agg_SPLAT=[];                               % SP lat on ground
     agg_SPLON=[];                               % SP lon on ground
@@ -368,7 +388,7 @@ if aggregate_data
     NBRCS_L1_L=agg_DDM_NBRCS; 
     powerAnalogW_L1_L=agg_PA_L1_L;
     qualityFlags=agg_QC; 
-    noise_floor=agg_NF;
+    noiseFloorCounts=agg_NF;
     BRCS=agg_BRCS;   
     reflectivityPeak_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
     qualityFlags_2=agg_QC_2; 
@@ -412,6 +432,16 @@ if aggregate_data
                 'reflectivityLinear_L1_L', 'kurtosisDDM', 'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L','qualityFlags', 'noise_floor',...
                  'reflectivityPeak_L1_L', 'qualityFlags_2',  'coherencyRatio', 'ddmLes', 'powerRatio', 'notToBeUsed', 'notRecommended','pseudoStd','-v7.3');
         
+    % Saving aggregated data
+    save_file(mission, out_format, L1b_product, L1b_product_version,...
+    CyGoutpath, project_name, daterangechar, initdate, ...
+    enddate, LonMin, LonMax, LatMin, LatMax, data_coverage, s, ...
+    UTC_Time, DoY, SoD, receivingSpacecraft, transmittingSpacecraft, ...
+    pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
+    rxAntennaGain, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
+    KURTOSIS, KURTOSIS_DOPP_0, TE_WIDTH, DDM_NBRCS, powerAnalogW, qualityControlFlags, ...
+    noiseFloorCounts, REFLECTIVITY_PEAK_L1_L, receivingAntenna, qualityControlFlags_2, ...
+    spAzimuthAngleDegNorth, coherencyRatio, DDM_LES, powerRatio, notToBeUsed, notRecommended);
 %
 end
 s=duration(0,0,toc);
