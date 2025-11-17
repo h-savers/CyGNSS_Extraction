@@ -332,6 +332,7 @@ for ii=1:length(datelist)     % loop on all the days
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
         reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
         ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
+        pseudostd=pseudostd(subgeo) ; 
     end
             save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
                 'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
@@ -404,6 +405,7 @@ if aggregate_data
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
         reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
         ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
+        pseudostd=pseudostd(subgeo) ; 
     end
         save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
                 'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
