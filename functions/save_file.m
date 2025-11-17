@@ -158,4 +158,6 @@ elseif strcmpi(out_format,"netcdf")
         % netcdf.putVar(netcdf_cyg, var_REFLECTIVITY_PEAK_L1_L, REFLECTIVITY_PEAK_L1_L);
         % netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2, qualityControlFlags_2);
         % netcdf.putVar(netcdf_cyg, var_DDM_LES, DDM_LES);
+%% Close netcdf file
+        netcdf.close(netcdf_cyg) ; 
 end
