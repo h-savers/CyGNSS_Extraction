@@ -84,6 +84,26 @@ LonMin=Answer{10};
 LonMax=Answer{11};
 aggregate_data=Answer{12};
 out_format=Answer{13};
+
+% ----- Added by Federico P. ----- %
+
+% Check if the output file format has been correctly insert  
+if ~contains(out_format, 'matlab', 'IgnoreCase', true) || ...
+   ~contains(out_format, 'netcdf', 'IgnoreCase', true)
+else
+    disp('Output file format is not supported, please check the input');
+end
+% Check if the "Filter out field" has been correclt insert
+if strcmpi(savespace,"Yes")
+    data_coverage='land';
+elseif strcmpi(savespace,"No")
+    data_coverage='global';
+else
+    disp('The Filter out field was filled in incorrectly. Please enter either Yes or No')
+end
+
+% ----- End ----- %
+
 % init_SM_Day=datetime(Answer{2}) ; 
 % final_SM_Day=datetime(Answer{3}) ; 
 % write the new configuration file
@@ -119,7 +139,7 @@ end
 % addpath('src/CyGNSS_Extraction/new_version/functions/')
 % 
 % % ************* Start GUI
-% conf_file = 'D:\Hamed\HydroGNSS_CalVal\CyGNSS_Extraction\conf\Configuration.mat';
+% conf_file = 'D:/Hamed/HydroGNSS_CalVal/CyGNSS_Extraction/conf/Configuration.mat';
 % 
 % % Set up prompts and dialog config
 % prompt = {'Taskname: ', ...
@@ -175,7 +195,7 @@ end
 % verifydir(CyGfigurepath)
 % 
 % 
-% save('D:\Hamed\HydroGNSS_CalVal\CyGNSS_Extraction\conf\Configuration.mat', 'Answer', '-append') ;
+% save('D:/Hamed/HydroGNSS_CalVal/CyGNSS_Extraction/conf/Configuration.mat', 'Answer', '-append') ;
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % GUI % ends here
@@ -201,7 +221,7 @@ delay_vector = 0:CA_chip_delay:16*CA_chip_delay;
 Doppler_bins=1:1:17; 
 Power_threshold=0.7;
 lambda=0.1903;                                                             % 0.19 m --> 19 cm  
-nsat=8;                                                                    % CyGNSS constellation
+nsat=2;                                                                    % CyGNSS constellation
 resolution=36;                                                             % Km for ease grid converter
 
 %%%%%%%%%%%%%%%%%%%%% INITIALIZING EMPTY VARIABLES FOR AGGREGATED SINGLE OUTPUT FILE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -255,7 +275,7 @@ for ii=1:length(datelist)     % loop on all the days
     disp(['% now processing day ' num2str(ii) ' out of ' num2str(length(datelist)) ', DoY: ' num2str(doy) ', date: ' datestr(datelist(ii),'yyyy-mm-dd')]);
     
     %%%%%%%%%%%%%%%%%%%%%% Defining paths for each day %%%%%%%%%%%%%%%%%%%%%%%%%
-    DoY_infolderpath     = [CyGinpath, '\' , year, '\', num2str(doy, '%03.0f'), '\'];        % Path to DoY folders containing input CyGNSS .nc data
+    DoY_infolderpath     = [CyGinpath, '/' , year, '/', num2str(doy, '%03.0f'), '/'];        % Path to DoY folders containing input CyGNSS .nc data
 
 
     %%%%%%%%%%%%%%%%%%%%%% CyGNSS data extraction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%

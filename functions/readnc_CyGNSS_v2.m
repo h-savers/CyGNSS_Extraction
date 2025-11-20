@@ -3,9 +3,10 @@
 % Reflectivity, Kurtosis and Kurtosis zero-Doppler.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain, ...
-    eirp,snr,nf,rxrange,txrange,ddm_nbrcs,qc,pa,Reflectivity_linear,Kurtosis,...
-    Kurtosis_dopp0, brcs, reflectivity_peak, qc_2, coherency_ratio, ddm_les, raw_counts]= ...
+function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_full, ...
+    prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
+    qc,pa,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
+    receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, raw_counts]= ...
     readnc_CyGNSS_v2(inpath,filename,lambda,Doppler_bins,savespace)
 
      % Reading data
@@ -14,6 +15,11 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      disp('% opening file ')
      ncid = netcdf.open(toread, 'NC_NOWRITE');
 % trackNcids = netcdf.inqGrps(ncid);
+     
+     % Read global attributes
+     mission=ncreadatt(toread,'/',"project");
+     L1b_product=ncreadatt(toread,'/',"title");
+     L1b_product_version=ncreadatt(toread,'/',"l1_algorithm_version");
 
      disp('% reading lat/lon')
      
@@ -90,6 +96,36 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
      varID=netcdf.inqVarID(ncid, 'reflectivity_peak')  ;
      reflectivity_peak= (netcdf.getVar(ncid,varID)) ;                      % Peak linear reflectivity
 
+     varID=netcdf.inqVarID(ncid, 'ddm_ant')  ;
+     receivingantenna=(netcdf.getVar(ncid,varID)) ;                 % Reading receiving Antenna pararmeters
+
+
+     disp('% reading spacecraft position and velocity to compute the specular point azimuth angle ')
+
+     varID=netcdf.inqVarID(ncid, 'sc_pos_x')  ;
+     sc_pos_x=single(netcdf.getVar(ncid,varID)) ;  
+     sc_pos_x = repmat(sc_pos_x',4,1);
+
+     varID=netcdf.inqVarID(ncid, 'sc_pos_y')  ;
+     sc_pos_y=single(netcdf.getVar(ncid,varID)) ;  
+     sc_pos_y = repmat(sc_pos_y',4,1);
+
+     varID=netcdf.inqVarID(ncid, 'sc_pos_z')  ;
+     sc_pos_z=single(netcdf.getVar(ncid,varID)) ;  
+     sc_pos_z = repmat(sc_pos_z',4,1);
+
+     varID=netcdf.inqVarID(ncid, 'sc_vel_x')  ;
+     sc_vel_x=single(netcdf.getVar(ncid,varID)) ;  
+     sc_vel_x = repmat(sc_vel_x',4,1);
+     
+     varID=netcdf.inqVarID(ncid, 'sc_vel_y')  ;
+     sc_vel_y=single(netcdf.getVar(ncid,varID)) ;  
+     sc_vel_y = repmat(sc_vel_y',4,1);
+
+     varID=netcdf.inqVarID(ncid, 'sc_vel_z')  ;
+     sc_vel_z=single(netcdf.getVar(ncid,varID)) ;          
+     sc_vel_z = repmat(sc_vel_z',4,1);
+
      disp('% reading quality flags ')
 
      varID=netcdf.inqVarID(ncid, 'quality_flags')  ;
@@ -141,11 +177,16 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              qc=qc(pos);
              peak=peak(pos);
              pa=pa(:,:,pos);
-             raw_counts=raw_counts(:,:,pos) ; 
-
+             raw_counts=raw_counts(:,:,pos) ;
              brcs=brcs(:, :, pos);                                         % added by Hamed to save full ddm
-
              reflectivity_peak=reflectivity_peak(pos);
+             sc_pos_x=sc_pos_x(pos);
+             sc_pos_y=sc_pos_y(pos);
+             sc_pos_z=sc_pos_z(pos);
+             sc_vel_x=sc_vel_x(pos);
+             sc_vel_y=sc_vel_y(pos);
+             sc_vel_z=sc_vel_z(pos);
+             receivingantenna=receivingantenna(pos);
              qc_2=qc_2(pos);
              coherency_ratio=coherency_ratio(pos);
              ddm_les=ddm_les(pos);
@@ -158,6 +199,7 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
              ts=ts(:);
              nst_full=nst_full(:);
              prn=prn(:);
+             azimuth_angle=azimuth_angle(:);
              theta=theta(:);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(:);
              sp_rx_gain=sp_rx_gain(:);
@@ -175,6 +217,13 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
 
              brcs=brcs(:, :, :);                                           % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
+             sc_pos_x=sc_pos_x(:);
+             sc_pos_y=sc_pos_y(:);
+             sc_pos_z=sc_pos_z(:);
+             sc_vel_x=sc_vel_x(:);
+             sc_vel_y=sc_vel_y(:);
+             sc_vel_z=sc_vel_z(:);
+             receivingantenna=receivingantenna(:);
              qc_2=qc_2(:);
              coherency_ratio=coherency_ratio(:);
              ddm_les=ddm_les(:);
@@ -183,7 +232,9 @@ function [sp_lat,sp_lon,scid,ts,nst_full,prn,theta,phi_Initial_sp_az_orbit,sp_rx
     end
      
      % Computing Reflectivity, Kurtosis and Kurtosis zero-Doppler
-     
+     disp('% computing the azimuth angle of the specular point')
+     [sp_azimuth_angle_deg_north]=compute_azimuth_angle(sc_pos_x,sc_pos_y,sc_pos_z,sc_vel_x,sc_vel_y,sc_vel_z,phi_Initial_sp_az_orbit);
+
      disp('% computing Reflectivity')
      sp_rx_gain_linear=10.^(sp_rx_gain/10);
      Reflectivity_linear=(((4.*pi).^2).*peak.*((single(rxrange)+single(txrange)).^2))./(eirp.*sp_rx_gain_linear.*lambda.^2);
