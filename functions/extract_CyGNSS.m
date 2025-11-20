@@ -17,16 +17,15 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [mission,L1b_product,L1b_product_version,UTC_Time, ...
-        DoY,SoD,receivingSpacecraft,SCID,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
+        DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, RECEIVING_ANTENNA...
         SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     UTC_Time=[];
-    SCID=[];                                % CYGNSS sat ID
     SoD=[];                                 % second of the day
     DoY=[];                                 % day of the year
-    receivingSpacecraft=[];                 % Receiving Spacecraft
+    SCID=[];                                % CYGNSS sat ID
     PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
     SPLAT=[];                               % SP lat on ground
     SPLON=[];                               % SP lon on ground
@@ -67,7 +66,8 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
             [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_full, ...
             prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
             qc,pa,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
-            receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, raw_counts]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
+            receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
+            raw_counts]=readnc_CyGNSS_v2(inpath,infile,lambda,Doppler_bins,savespace); 
         
             disp('% computing  Trailing Edge')                     
             TE_width=computeTE(double(pa),delay_vector,Power_threshold);  
@@ -89,7 +89,7 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
             SPLON=cat(1,SPLON, sp_lon(:));
             THETA=cat(1,THETA, theta(:));
             PHI_Initial_sp_az_orbit=cat(1,PHI_Initial_sp_az_orbit, phi_Initial_sp_az_orbit(:));
-            GAIN=cat(1,GAIN, gain(:));
+            GAIN=cat(1,GAIN, sp_rx_gain(:));
             EIRP=cat(1,EIRP, eirp(:));
             SNR=cat(1,SNR, snr(:));
             QC=cat(1,QC, qc(:)); 
@@ -99,12 +99,12 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
             KURTOSIS=cat(1,KURTOSIS, Kurtosis(:));
             KURTOSIS_DOPP_0=cat(1,KURTOSIS_DOPP_0, Kurtosis_dopp0(:)); 
             TE_WIDTH=cat(1,TE_WIDTH, TE_width(:)); 
-            REFLECTIVITY_LINEAR=cat(1,REFLECTIVITY_LINEAR,reflectivity_linear(:));
+            REFLECTIVITY_LINEAR=cat(1,REFLECTIVITY_LINEAR,Reflectivity_linear(:));
             RXRANGE=cat(1,RXRANGE,rxrange);
             TXRANGE=cat(1,TXRANGE,txrange);
             NST=cat(1,NST,nst_full);
-            SP_AZIMUTH_ANGLE=cat(1,SP_AZIMUTH_ANGLE,sp_azimuth_angle_deg_north)
-            RECEIVING_ANTENNA=cat(1,RECEIVING_ANTENNA,receivingantenna)
+            SP_AZIMUTH_ANGLE=cat(1,SP_AZIMUTH_ANGLE,sp_azimuth_angle_deg_north);
+            RECEIVING_ANTENNA=cat(1,RECEIVING_ANTENNA,receivingantenna);
             BRCS=cat(3, BRCS, brcs);                                       % added by Hamed to keep full ddm
 
             REFLECTIVITY_PEAK=cat(1,REFLECTIVITY_PEAK,reflectivity_peak);                
