@@ -155,7 +155,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      disp('% reading analog power')
 
      varID=netcdf.inqVarID(ncid, 'power_analog')  ;
-     pa= (netcdf.getVar(ncid,varID)) ;                                     % power analog is the DDM in Watt unit
+     pa=(netcdf.getVar(ncid,varID)) ;                                     % power analog is the DDM in Watt unit
      % pa=ncread(toread,'power_analog');
 
      varID=netcdf.inqVarID(ncid, 'raw_counts')  ; 

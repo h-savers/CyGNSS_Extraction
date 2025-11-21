@@ -291,9 +291,9 @@ for ii=1:length(datelist)     % loop on all the days
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
         [mission,L1b_product,L1b_product_version,timeUTC, ...
-            dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit...
-            reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags,noise_floor,BRCS,receivingAntenna,...
-            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd, bitRatio]= ...
+            dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit,...
+            reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags_L1_L,noiseFloorCounts_L1_L,BRCS,receivingAntenna,...
+            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2_L1_L , coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, pseudoStd, bitRatio]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);  
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -318,17 +318,17 @@ for ii=1:length(datelist)     % loop on all the days
             agg_TE_WIDTH=cat(1,agg_TE_WIDTH, teWidth(:)); 
             agg_DDM_NBRCS=cat(1,agg_DDM_NBRCS, NBRCS_L1_L(:)); 
             agg_PA_L1_L=cat(1,agg_PA_L1_L, powerAnalogW_L1_L(:));
-            agg_QC=cat(1,agg_QC, qualityFlags(:)); 
-            agg_NF=cat(1,agg_NF, noise_floor(:));
+            agg_QC=cat(1,agg_QC, qualityFlags_L1_L(:)); 
+            agg_NF=cat(1,agg_NF, noiseFloorCounts_L1_L(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);   
             agg_receivingAntenna=cat(1,agg_receivingAntenna,receivingAntenna);
             agg_spAzimuthAngleDegNorth=cat(1,agg_spAzimuthAngleDegNorth,spAzimuthAngleDegNorth);
             agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, reflectivityPeak_L1_L(:)) ; 
             agg_REFLECTIVITY_PEAK_L1_L_CALIBRATED=cat(1,agg_REFLECTIVITY_PEAK_L1_L_CALIBRATED,reflectivityPeakRecal_L1_L(:)) ;
-            agg_QC_2=cat(1,agg_QC_2, qualityFlags_2(:)); 
-            agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio(:)) ;
+            agg_QC_2=cat(1,agg_QC_2, qualityFlags_2_L1_L(:)); 
+            agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio_L1_L(:)) ;
             agg_DDM_LES=cat(1, agg_DDM_LES,ddmLes(:)) ; 
-            agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio(:)) ; 
+            agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio_L1_L(:)) ; 
             agg_PSEUDOSTD=cat(1, agg_PSEUDOSTD, pseudoStd) ; 
             agg_bitRatio=cat(1,agg_bitRatio, bitRatio) ;
 
@@ -342,11 +342,11 @@ for ii=1:length(datelist)     % loop on all the days
                         % 22 (gps_pvt_sp3_error)
                         % 28 (low_quality_gps_ant_knowledge)
                         % 30 (anomalous_sampling_period)
-                    oqf1=(bitget(qualityFlags,17) | bitget(qualityFlags,22) | bitget(qualityFlags,28) | bitget(qualityFlags,30));
+                    oqf1=(bitget(qualityFlags_L1_L,17) | bitget(qualityFlags_L1_L,22) | bitget(qualityFlags_L1_L,28) | bitget(qualityFlags_L1_L,30));
                     % Quality flag 2 - currently using bits:
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
-                    oqf2=(bitget(qualityFlags_2,12) | bitget(qualityFlags_2,18));
+                    oqf2=(bitget(qualityFlags_2_L1_L,12) | bitget(qualityFlags_2_L1_L,18));
                     notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
@@ -365,9 +365,9 @@ for ii=1:length(datelist)     % loop on all the days
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
         reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
-        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
+        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; reflectivityPeakRecal_L1_L=reflectivityPeakRecal_L1_L(subgeo) ;
-        qualityFlags_2=qualityFlags_2(subgeo) ; coherencyRatio=coherencyRatio(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
+        qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ; coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
         notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ;
     end
             s=duration(0,0,toc);
@@ -377,9 +377,9 @@ for ii=1:length(datelist)     % loop on all the days
             timeUTC, receivingSpacecraft, transmittingSpacecraft, ...
             pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
             rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
-            kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
-            noise_floor, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2, bitRatio, ...
-            spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
+            kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
+            noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
+            spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -411,17 +411,17 @@ if aggregate_data
     teWidth=agg_TE_WIDTH; 
     NBRCS_L1_L=agg_DDM_NBRCS; 
     powerAnalogW_L1_L=agg_PA_L1_L;
-    qualityFlags=agg_QC; 
-    noise_floor=agg_NF;
+    qualityFlags_L1_L=agg_QC; 
+    noiseFloorCounts_L1_L=agg_NF;
     BRCS=agg_BRCS;   
     receivingAntenna=agg_receivingAntenna;
     spAzimuthAngleDegNorth=agg_spAzimuthAngleDegNorth;
     reflectivityPeak_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
     reflectivityPeakRecal_L1_L=agg_REFLECTIVITY_PEAK_L1_L_CALIBRATED ;
-    qualityFlags_2=agg_QC_2; 
-    coherencyRatio=agg_COHERENCY_RATIO ; 
+    qualityFlags_2_L1_L=agg_QC_2; 
+    coherencyRatio_L1_L=agg_COHERENCY_RATIO ; 
     ddmLes=agg_DDM_LES ; 
-    powerRatio=agg_POWER_RATIO ; 
+    powerRatio_L1_L=agg_POWER_RATIO ; 
     pseudoStd=agg_PSEUDOSTD ; 
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
@@ -429,11 +429,11 @@ if aggregate_data
                         % 22 (gps_pvt_sp3_error)
                         % 28 (low_quality_gps_ant_knowledge)
                         % 30 (anomalous_sampling_period)
-                    oqf1=(bitget(qualityFlags,17) | bitget(qualityFlags,22) | bitget(qualityFlags,28) | bitget(qualityFlags,30));
+                    oqf1=(bitget(qualityFlags_L1_L,17) | bitget(qualityFlags_L1_L,22) | bitget(qualityFlags_L1_L,28) | bitget(qualityFlags_L1_L,30));
                         % Quality flag 2 - currently using bits:
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
-                    oqf2=(bitget(qualityFlags_2,12) | bitget(qualityFlags_2,18));
+                    oqf2=(bitget(qualityFlags_2_L1_L,12) | bitget(qualityFlags_2_L1_L,18));
                     notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
@@ -449,9 +449,9 @@ if aggregate_data
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
         reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; reflectivityPeakRecal_L1_L=reflectivityPeakRecal_L1_L(subgeo), kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
-        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        receivingAntenna=receivingAntenna(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
-        ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
+        teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
+        receivingAntenna=receivingAntenna(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ;  coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ;
+        ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
         spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudostd=pseudostd(subgeo) ; 
     end
         s=duration(0,0,toc);
@@ -461,9 +461,9 @@ if aggregate_data
         timeUTC, receivingSpacecraft, transmittingSpacecraft, ...
         pseudoRandomNoise, spAzimuthAngleDegOrbit, specularPointLat, specularPointLon, incidenceAngleDeg, ...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, reflectivityPeakRecal_L1_L, ...
-        kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
-        noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, bitRatio, ...
-        spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
+        kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
+        noiseFloorCounts_L1_L, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
+        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
         
 %
 end
