@@ -19,7 +19,7 @@
 function [mission,L1b_product,L1b_product_version,timeUTC, ...
         DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, RECEIVING_ANTENNA...
-        SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO]= ...
+        SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, REFLECTIVITY_PEAK_CALIBRATED, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     timeUTC=[];
@@ -54,7 +54,8 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
     BIT_RATIO=[] ;                          % added by Federico - Bit Ratio
 
 %%%%%%%%%%%%%%%%%%%%% added by Mauro
-    REFLECTIVITY_PEAK=[] ;                  % Reflectivity in lienar units from L1b producxt                  
+    REFLECTIVITY_PEAK=[] ;                  % Reflectivity in lienar units from L1b product     
+    REFLECTIVITY_PEAK_CALIBRATED=[] ;       % Reflectivity peak calibrated
     QC_2=[] ;                               % Second quality control flag from L1b product
     COHERENCY_RATIO=[] ;                    % Coherency ration from L1b produt
     DDM_LES=[]  ;                           % DDM_LES from L1b product
@@ -82,6 +83,14 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
 
             disp('% computing the reflectivity calibration')
 
+            lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
+            decimation_factor = -9999 * ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
+            [~, mask_idx] = ismember(lookup, calibration_table(:,1:3), 'rows'); % check the corrispondence between the two matrices
+            valid = mask_idx > 0; % check the logic indices
+            decimation_factor(valid) = calibration_table(mask_idx(valid), 4); % extract the decimation factor from the calibration_table
+            valid = (reflectivity_peak ~= -9999); % check if the reflectivity_peak vector has -9999 values, in that case do not calibrate the results
+            reflectivity_peak_calibrated = -9999 * ones(size(reflectivity_peak));
+            reflectivity_peak_calibrated(valid) = reflectivity_peak(valid) .* decimation_factor(valid);
 
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
             year=zeros(size(sp_lat)) + str2double(datechar(1:4)); % to have the same size as sp_lat also for the year, since we are interested in the UTC time
@@ -116,7 +125,8 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             RECEIVING_ANTENNA=cat(1,RECEIVING_ANTENNA,receivingantenna);
             BRCS=cat(3, BRCS, brcs);                                       % added by Hamed to keep full ddm
 
-            REFLECTIVITY_PEAK=cat(1,REFLECTIVITY_PEAK,reflectivity_peak);                
+            REFLECTIVITY_PEAK=cat(1,REFLECTIVITY_PEAK,reflectivity_peak);  
+            REFLECTIVITY_PEAK_CALIBRATED=cat(1,REFLECTIVITY_PEAK_CALIBRATED,reflectivity_peak_calibrated);
             QC_2=cat(1,QC_2, qc_2(:));
             COHERENCY_RATIO=cat(1,COHERENCY_RATIO,coherency_ratio);
             DDM_LES=cat(1,DDM_LES,ddm_les);    
