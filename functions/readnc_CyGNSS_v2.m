@@ -7,7 +7,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
     prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
     qc,pa,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
     receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
-    raw_counts]= ...
+    raw_counts,bit_ratio]= ...
     readnc_CyGNSS_v2(inpath,filename,lambda,Doppler_bins,savespace)
 
      % Reading data
@@ -102,7 +102,15 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
 
      varID=netcdf.inqVarID(ncid, 'ddm_ant')  ;
      receivingantenna=(netcdf.getVar(ncid,varID)) ;                 % Reading receiving Antenna pararmeters
+     
+     disp('% bit ratio import')
 
+     varID=netcdf.inqVarID(ncid, 'bit_ratio_lo_hi_starboard')  ;
+     bit_ratio_hi_lo_starboard=(netcdf.getVar(ncid,varID)) ;                 % Reading bit ratio for the starboard antenna
+     bit_ratio_hi_lo_starboard = repmat(bit_ratio_hi_lo_starboard',4,1);
+     varID=netcdf.inqVarID(ncid, 'bit_ratio_lo_hi_port')  ;
+     bit_ratio_hi_lo_port=(netcdf.getVar(ncid,varID)) ;                 % Reading bit ratio for the starboard antenna     
+     bit_ratio_hi_lo_port = repmat(bit_ratio_hi_lo_port',4,1);
 
      disp('% reading spacecraft position and velocity to compute the specular point azimuth angle ')
 
@@ -159,7 +167,14 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      lf=(bitget(qc,11));                                                   % SP over land flag
      maxpa=squeeze(max(pa(1:size(pa,1),1:size(pa,2),:,:)));
      peak=squeeze(max(maxpa(1:size(pa,2),:,:)));                           % peak of each DDM (tested vs for loop)
+
+     disp('% bit ratio choice, depending on the receiving antenna, port or starboard')
      
+     bit_ratio = bit_ratio_hi_lo_starboard;                      % default port
+     bit_ratio(receivingantenna == 3) = ...
+     bit_ratio_hi_lo_port(receivingantenna == 3);       % sovrascrivi starboard
+
+
      % forcing to NaN data out of land
      if strcmp(savespace,'yes') | strcmp(savespace,'Yes')
              pos=find(lf>0); %lf(lf==0)=NaN;
@@ -192,6 +207,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              sc_vel_y=sc_vel_y(pos);
              sc_vel_z=sc_vel_z(pos);
              receivingantenna=receivingantenna(pos);
+             bit_ratio=bit_ratio(pos);
              qc_2=qc_2(pos);
              coherency_ratio=coherency_ratio(pos);
              ddm_les=ddm_les(pos);
@@ -230,6 +246,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              sc_vel_y=sc_vel_y(:);
              sc_vel_z=sc_vel_z(:);
              receivingantenna=receivingantenna(:);
+             bit_ratio=bit_ratio(:);
              qc_2=qc_2(:);
              coherency_ratio=coherency_ratio(:);
              ddm_les=ddm_les(:);

@@ -262,6 +262,7 @@ if aggregate_data
     agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
     agg_POWER_RATIO=[] ;                        % Power raio from Mohammad M. Al-Khaldi et al., 2021
     agg_PSEUDOSTD=[] ; 
+    agg_bitRatio=[] ;
 
 else
     disp('% Processing each day separately and saving individual output files');
@@ -289,7 +290,7 @@ for ii=1:length(datelist)     % loop on all the days
         [mission,L1b_product,L1b_product_version,timeUTC, ...
             dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit...
             reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags,noise_floor,BRCS,receivingAntenna,...
-            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd]= ...
+            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd, bitRatio]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
@@ -324,6 +325,7 @@ for ii=1:length(datelist)     % loop on all the days
             agg_DDM_LES=cat(1, agg_DDM_LES,ddmLes(:)) ; 
             agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio(:)) ; 
             agg_PSEUDOSTD=cat(1, agg_PSEUDOSTD, pseudoStd) ; 
+            agg_bitRatio=cat(1,agg_bitRatio, bitRatio) ;
 
 
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
@@ -361,7 +363,7 @@ for ii=1:length(datelist)     % loop on all the days
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; 
         qualityFlags_2=qualityFlags_2(subgeo) ; coherencyRatio=coherencyRatio(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
-        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; 
+        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ;
     end
             s=duration(0,0,toc);
             save_file(mission, out_format, L1b_product, L1b_product_version,...
@@ -371,7 +373,7 @@ for ii=1:length(datelist)     % loop on all the days
             pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
             rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
             kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
-            noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, ...
+            noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, bitRatio, ...
             spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -454,11 +456,10 @@ if aggregate_data
         pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
-        noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, ...
+        noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
         
 %
 end
-s=duration(0,0,toc);
 close all
 disp(['total duration is ' char(duration(0,0,toc))])
