@@ -84,8 +84,11 @@ elseif strcmpi(out_format,"netcdf")
         var_SNR_L1_L = netcdf.defVar(netcdf_cyg,'SNR_L1_L','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_SNR_L1_L, 'SNR_L1_L', 'Signal to noise ratio of signal L1 and left polarization [dB]');
         
-        var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
-        netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
+        var_reflectivityPeak_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeak_L1_L','NC_DOUBLE',dimid);
+        netcdf.putAtt(netcdf_cyg, var_reflectivityPeak_L1_L, 'reflectivityPeak_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB] read from L1b CyGNSS data');
+
+        %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
+        %netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
         
         var_qualityControlFlags = netcdf.defVar(netcdf_cyg,'qualityFlags','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_qualityControlFlags, 'qualityFlags', 'Quality check flags of the observation [int32]');
@@ -118,13 +121,13 @@ elseif strcmpi(out_format,"netcdf")
         
         % Variable NOT used, not in the Excel
         %var_PHI_Initial_sp_az_orbit = netcdf.defVar(netcdf_cyg,'PHI_Initial_sp_az_orbit','NC_DOUBLE',dimid);
-        var_KURTOSIS = netcdf.defVar(netcdf_cyg,'kurtosisDDM','NC_DOUBLE',dimid);
-        var_KURTOSIS_DOPP_0 = netcdf.defVar(netcdf_cyg,'kurtosisDopp0','NC_DOUBLE',dimid);
-        var_TE_WIDTH = netcdf.defVar(netcdf_cyg,'teWidth','NC_DOUBLE',dimid);
-        var_DDM_NBRCS = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
+        %var_KURTOSIS = netcdf.defVar(netcdf_cyg,'kurtosisDDM','NC_DOUBLE',dimid);
+        %var_KURTOSIS_DOPP_0 = netcdf.defVar(netcdf_cyg,'kurtosisDopp0','NC_DOUBLE',dimid);
+        %var_TE_WIDTH = netcdf.defVar(netcdf_cyg,'teWidth','NC_DOUBLE',dimid);
+        %var_DDM_NBRCS = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
         %var_PA_L1_L = netcdf.defVar(netcdf_cyg,'powerAnalogW','NC_DOUBLE',dimid);
-        var_REFLECTIVITY_PEAK_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeak_L1_L','NC_DOUBLE',dimid);
-        var_DDM_LES = netcdf.defVar(netcdf_cyg,'DDM_LES','NC_DOUBLE',dimid);
+        %var_REFLECTIVITY_PEAK_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeak_L1_L','NC_DOUBLE',dimid);
+        %var_DDM_LES = netcdf.defVar(netcdf_cyg,'DDM_LES','NC_DOUBLE',dimid);
 
         % End definition mode
         netcdf.endDef(netcdf_cyg);
@@ -143,7 +146,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_rxAntennaGain_L1_L, rxAntennaGain_L1_L);
         netcdf.putVar(netcdf_cyg, var_EIRP_L1, EIRP_L1);
         netcdf.putVar(netcdf_cyg, var_SNR_L1_L, SNR_L1_L);
-        netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L);
+        netcdf.putVar(netcdf_cyg, var_reflectivityPeak_L1_L, reflectivityPeak_L1_L);
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags, qualityFlags);
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2, qualityFlags_2);
         netcdf.putVar(netcdf_cyg, var_noise_floor, noise_floor);
