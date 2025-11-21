@@ -26,7 +26,7 @@ else
     end
     mode="input" ;
 end
-[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
     snr_th, rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath);
 %
 switch mode
@@ -36,13 +36,13 @@ switch mode
 %
     disp('GUI mode')
 % 
-Answer{1}= char(Taskname) ;         Answer{2}=char(string(initdate)) ;
-Answer{3}=char(enddate)  ;          Answer{4}= char(string(savespace)) ;
-Answer{5}=char(CyGinpath)  ;        Answer{6}= char(string(CyGoutpath)) ;
-Answer{7}= char(string(logpath)) ;
-Answer{8}=char(string(LatMin))  ;   Answer{9}= char(string(LatMax)) ;
-Answer{10}=char(string(LonMin))  ;  Answer{11}=char(string(LonMax)) ; 
-Answer{12}=char(aggregate_data) ;   Answer{13}=char(out_format) ; 
+Answer{1}=char(Taskname) ;         Answer{2}=char(string(initdate)) ;
+Answer{3}=char(enddate)  ;          Answer{4}=char(string(savespace)) ;
+Answer{5}=char(CyGinpath)  ;        Answer{6}=char(string(CyGoutpath)) ;
+Answer{7}=char(string(logpath)) ;   Answer{8}=char(string(calibration_file)) ;
+Answer{9}=char(string(LatMin))  ;   Answer{10}=char(string(LatMax)) ;
+Answer{11}=char(string(LonMin))  ;  Answer{12}=char(string(LonMax)) ; 
+Answer{13}=char(aggregate_data) ;   Answer{14}=char(out_format) ; 
 %
 % Set up prompts and dialog config
 prompt = {'Outfileprefix: ', ...
@@ -52,6 +52,7 @@ prompt = {'Outfileprefix: ', ...
           'DataInputRootPath: ', ...
           'DataOutputRootPath: ', ...
           'LogsOutputRootPath: ', ...
+          'Calibration CSV lookup table path + filename with extension, :', ...
           'Southernmost latitude [>= -90 deg]: ', ...
           'Northernmost latitude [<= 90 deg]: ', ...
           'Westernmost longitude [>= -180 deg]: ', ...
@@ -60,14 +61,14 @@ prompt = {'Outfileprefix: ', ...
           'Output file format [Matlab / netcdf]:'};
 %      
 name = 'Extraction of CyGNSS L1b data';
-numlines = repmat([1 90], 13, 1);
+numlines = repmat([1 90], 14, 1);
 opts.Resize = 'on';
 opts.WindowStyle = 'normal';
 opts.Interpreter = 'tex';
 defaultanswer={Answer{1},Answer{2},...
                  Answer{3},Answer{4},Answer{5},Answer{6},Answer{7},...
                  Answer{8},Answer{9},Answer{10},Answer{11},...
-                 Answer{12}, Answer{13}} ; 
+                 Answer{12}, Answer{13}, Answer{14}}; 
 % Launch input dialog
 Answer = inputdlg(prompt, name, numlines, defaultanswer, opts);
 project_name= Answer{1};
@@ -78,12 +79,13 @@ savespace= Answer{4};
 CyGinpath= Answer{5};
 CyGoutpath=Answer{6};
 logpath=Answer{7};
-LatMin=Answer{8};
-LatMax=Answer{9};
-LonMin=Answer{10};
-LonMax=Answer{11};
-aggregate_data=Answer{12};
-out_format=Answer{13};
+calibration_file=Answer{8};
+LatMin=Answer{9};
+LatMax=Answer{10};
+LonMin=Answer{11};
+LonMax=Answer{12};
+aggregate_data=Answer{13};
+out_format=Answer{14};
 
 % ----- Added by Federico P. ----- %
 
@@ -107,7 +109,7 @@ end
 % init_SM_Day=datetime(Answer{2}) ; 
 % final_SM_Day=datetime(Answer{3}) ; 
 % write the new configuration file
-WriteConfig(configurationPath, Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+WriteConfig(configurationPath, Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
      snr_th, rx_gain_th, inc_angl_th, nsnr_th);
 aggregate_data = strcmpi(strtrim(Answer{12}), "Yes");  % numeric switch to aggregate data from different days and save it in a single file
 LatMin=double(string(LatMin)) ; LatMax=double(string(LatMax)) ; 
@@ -291,7 +293,8 @@ for ii=1:length(datelist)     % loop on all the days
             dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit...
             reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags,noise_floor,BRCS,receivingAntenna,...
             spAzimuthAngleDegNorth, reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd, bitRatio]= ...
-            extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
+            extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);  
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
             disp(['% cat variables from day ', datechar ' to aggregated output file']);

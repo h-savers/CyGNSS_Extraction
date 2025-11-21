@@ -1,4 +1,4 @@
-function WriteConfig(configurationPath,Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, ...
+function WriteConfig(configurationPath,Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, ...
     LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
     snr_th, rx_gain_th, inc_angl_th, nsnr_th)
 conffileID = fopen(configurationPath, 'W') ; 
@@ -10,6 +10,7 @@ fprintf(conffileID,'%s',['savespace=' savespace] ); fprintf(conffileID,'\n') ;
 fprintf(conffileID,'%s',['CyGinpath=' CyGinpath] ); fprintf(conffileID,'\n') ; 
 fprintf(conffileID,'%s', ['CyGoutpath=' CyGoutpath] ); fprintf(conffileID,'\n') ; 
 fprintf(conffileID,'%s', ['logpath=' logpath] ); fprintf(conffileID,'\n') ; 
+fprintf(conffileID,'%s', ['calibration_file=' calibration_file] ); fprintf(conffileID,'\n') ; 
 
 
 fprintf(conffileID,['LatMin=' char(string(LatMin))] ); fprintf(conffileID,'\n') ; 

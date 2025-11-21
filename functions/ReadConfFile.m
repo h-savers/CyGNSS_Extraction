@@ -1,5 +1,5 @@
-function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath,...
-    LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, ...
+    LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format, ...
     snr_th, rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath)
 %%%%%%%  Read configuration file
 %
@@ -71,6 +71,11 @@ function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath
             ConfigRightLine= find(ConfigRightLine==1)  ;   
             startIndex= regexp(lines(ConfigRightLine),'=') ; 
             logpath= extractAfter(lines(ConfigRightLine),startIndex) ; % 
+            %%                                   
+            ConfigRightLine= contains(lines,'calibration_file')  ;  
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            calibration_file= extractAfter(lines(ConfigRightLine),startIndex) ; % 
             %%                   
             ConfigRightLine= contains(lines,'aggregate_data')  ;  
             ConfigRightLine= find(ConfigRightLine==1)  ;   

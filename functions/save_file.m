@@ -14,6 +14,7 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
 
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
+timestamp_global_attr = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
 if strcmpi(out_format,"Matlab")
       save(fullfile(CyGoutpath, [project_name '_' daterangechar '_' timestamp '.mat']), ...
@@ -32,10 +33,10 @@ elseif strcmpi(out_format,"netcdf")
         
         % Define the dimension of the NetCDF file
         dimid = netcdf.defDim(netcdf_cyg, 'record', length(timeUTC));
-
+    
         % Assign global attributes
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File name', [project_name, '_' daterangechar, '.nc']);
-        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File generation time [hh:mm:ss]', [string(s)]);
+        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File generation time [yyyy-mm-dd HH:MM:SS]', [string(timestamp_global_attr)]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Mission', [mission]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b product', [L1b_product]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b product version', [L1b_product_version]);
