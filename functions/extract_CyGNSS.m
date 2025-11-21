@@ -16,13 +16,13 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [mission,L1b_product,L1b_product_version,UTC_Time, ...
+function [mission,L1b_product,L1b_product_version,timeUTC, ...
         DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, RECEIVING_ANTENNA...
         SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    UTC_Time=[];
+    timeUTC=[];
     Year=[]; 
     SoD=[];                                 % second of the day
     DoY=[];                                 % day of the year
@@ -88,7 +88,7 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
             Year=cat(1,Year,year(:));
             SoD=cat(1,SoD,ts(:));
             DoY=cat(1,DoY,dayofyear(:));
-            UTC_Time=datetime(Year, 1, 1) + days(DoY - 1) + seconds(SoD); % Let's calculate the UTC Time
+            timeUTC=datetime(Year, 1, 1) + days(DoY - 1) + seconds(SoD); % Let's calculate the UTC Time
             SV_NUM=cat(1,SV_NUM,sv_num(:));
             PRN=cat(1,PRN, prn(:));
             SPLAT=cat(1,SPLAT, sp_lat(:));

@@ -6,19 +6,18 @@
 function save_file(mission, out_format, L1b_product, L1b_product_version,...
         CyGoutpath, project_name, daterangechar, initdate, ...
         enddate, LonMin, LonMax, LatMin, LatMax, data_coverage, s, ...
-        UTC_Time, receivingSpacecraft, transmittingSpacecraft, ...
+        timeUTC, receivingSpacecraft, transmittingSpacecraft, ...
         pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
         noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, ...
         spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
 
-disp('% Saving aggregated data in a single output file');
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 
 if strcmpi(out_format,"Matlab")
       save(fullfile(CyGoutpath, [project_name '_' daterangechar '_' timestamp '.mat']), ...
-        'UTC_Time', 'receivingSpacecraft', 'transmittingSpacecraft', ...
+        'timeUTC', 'receivingSpacecraft', 'transmittingSpacecraft', ...
         'pseudoRandomNoise', 'spAzimuthAngleDegOrbit', 'specularPointLat', 'specularPointLon', ...
         'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', ...
         'reflectivityLinear_L1_L', 'kurtosisDDM', ...
@@ -32,22 +31,22 @@ elseif strcmpi(out_format,"netcdf")
         netcdf_cyg = netcdf.create([CyGoutpath, '/', project_name, '_' daterangechar, '_' timestamp, '.nc'],'netcdf4');
         
         % Define the dimension of the NetCDF file
-        dimid = netcdf.defDim(netcdf_cyg, 'record', length(UTC_Time));
+        dimid = netcdf.defDim(netcdf_cyg, 'record', length(timeUTC));
 
         % Assign global attributes
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File name', [project_name, '_' daterangechar, '.nc']);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File generation time [hh:mm:ss]', [string(s)]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Mission', [mission]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b product', [L1b_product]);
-        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b prodcut version', [L1b_product_version]);
+        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b product version', [L1b_product_version]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Initial day', [initdate]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Final day', [enddate]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Data coverage', [data_coverage]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Geographical area', [num2str(LatMin) ' - ' num2str(LatMax) ' / ' num2str(LonMin) ' - ' num2str(LonMax)]);
 
         % Define all variables
-        var_UTC_time = netcdf.defVar(netcdf_cyg,'UTC_Time','NC_STRING',dimid);
-        netcdf.putAtt(netcdf_cyg, var_UTC_time, 'UTC_Time', 'Time of observation in UTC');
+        var_timeUTC = netcdf.defVar(netcdf_cyg,'timeUTC','NC_STRING',dimid);
+        netcdf.putAtt(netcdf_cyg, var_timeUTC, 'timeUTC', 'Time of observation in UTC');
         
         var_receivingSpacecraft = netcdf.defVar(netcdf_cyg,'receivingSpacecraft','NC_SHORT',dimid);
         netcdf.putAtt(netcdf_cyg, var_receivingSpacecraft, 'receivingSpacecraft', 'ID of the receiving spacecraft');
@@ -90,7 +89,10 @@ elseif strcmpi(out_format,"netcdf")
         
         var_qualityControlFlags = netcdf.defVar(netcdf_cyg,'qualityFlags','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_qualityControlFlags, 'qualityFlags', 'Quality check flags of the observation [int32]');
-        
+
+        var_qualityControlFlags_2 = netcdf.defVar(netcdf_cyg,'qualityFlags_2','NC_INT',dimid);
+        netcdf.putAtt(netcdf_cyg, var_qualityControlFlags_2, 'qualityFlags_2', 'Second quality check flags of the observation [int32]');
+
         var_noise_floor = netcdf.defVar(netcdf_cyg,'noise_floor','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_noise_floor, 'noise_floor', 'Noise floor of the DDM [Watt]');
         
@@ -122,15 +124,14 @@ elseif strcmpi(out_format,"netcdf")
         var_DDM_NBRCS = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
         %var_PA_L1_L = netcdf.defVar(netcdf_cyg,'powerAnalogW','NC_DOUBLE',dimid);
         var_REFLECTIVITY_PEAK_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeak_L1_L','NC_DOUBLE',dimid);
-        var_qualityControlFlags_2 = netcdf.defVar(netcdf_cyg,'qualityFlags_2','NC_UINT',dimid);
         var_DDM_LES = netcdf.defVar(netcdf_cyg,'DDM_LES','NC_DOUBLE',dimid);
 
         % End definition mode
         netcdf.endDef(netcdf_cyg);
     
         % Write data to variables
-        UTC_Time_str = string(UTC_Time);
-        netcdf.putVar(netcdf_cyg, var_UTC_time, UTC_Time_str);
+        timeUTC_str = string(timeUTC);
+        netcdf.putVar(netcdf_cyg, var_timeUTC, timeUTC_str);
         netcdf.putVar(netcdf_cyg, var_receivingSpacecraft, receivingSpacecraft);
         netcdf.putVar(netcdf_cyg, var_transmittingSpacecraft, transmittingSpacecraft);
         netcdf.putVar(netcdf_cyg, var_pseudoRandomNoise, pseudoRandomNoise);
@@ -144,6 +145,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_SNR_L1_L, SNR_L1_L);
         netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L);
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags, qualityFlags);
+        netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2, qualityFlags_2);
         netcdf.putVar(netcdf_cyg, var_noise_floor, noise_floor);
         netcdf.putVar(netcdf_cyg, var_recevingAntenna, receivingAntenna);
         netcdf.putVar(netcdf_cyg, var_coherencyRatio, coherencyRatio);
@@ -159,6 +161,6 @@ elseif strcmpi(out_format,"netcdf")
         % netcdf.putVar(netcdf_cyg, var_REFLECTIVITY_PEAK_L1_L, REFLECTIVITY_PEAK_L1_L);
         % netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2, qualityControlFlags_2);
         % netcdf.putVar(netcdf_cyg, var_DDM_LES, DDM_LES);
-%% Close netcdf file
+%% ------- Close netcdf file ------- %%
         netcdf.close(netcdf_cyg) ; 
 end
