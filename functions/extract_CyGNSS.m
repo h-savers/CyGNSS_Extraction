@@ -17,15 +17,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [mission,L1b_product,L1b_product_version,UTC_Time, ...
-        DoY,SoD,SCID,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
+        DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, RECEIVING_ANTENNA...
         SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD]= ...
         extract_CyGNSS(nsat,datechar,doy,inpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     UTC_Time=[];
+    Year=[]; 
     SoD=[];                                 % second of the day
     DoY=[];                                 % day of the year
     SCID=[];                                % CYGNSS sat ID
+    SV_NUM=[];                              % transmitting Spacecraft number
     PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
     SPLAT=[];                               % SP lat on ground
     SPLON=[];                               % SP lon on ground
@@ -63,7 +65,7 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
         if ~isempty(chkfile)    
             infile=chkfile.name;  
             disp(['% reading satellite ' num2str(jj) ' - file ' infile ])
-            [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_full, ...
+            [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts,nst_full, ...
             prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
             qc,pa,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
             receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
@@ -79,11 +81,15 @@ function [mission,L1b_product,L1b_product_version,UTC_Time, ...
 
 
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
+            year=zeros(size(sp_lat)) + str2double(datechar(1:4)); % to have the same size as sp_lat also for the year, since we are interested in the UTC time
         % cat variables
             disp('% cat variables ')
             SCID=cat(1,SCID,scid(:));
+            Year=cat(1,Year,year(:));
             SoD=cat(1,SoD,ts(:));
             DoY=cat(1,DoY,dayofyear(:));
+            UTC_Time=datetime(Year, 1, 1) + days(DoY - 1) + seconds(SoD); % Let's calculate the UTC Time
+            SV_NUM=cat(1,SV_NUM,sv_num(:));
             PRN=cat(1,PRN, prn(:));
             SPLAT=cat(1,SPLAT, sp_lat(:));
             SPLON=cat(1,SPLON, sp_lon(:));

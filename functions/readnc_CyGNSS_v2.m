@@ -3,7 +3,7 @@
 % Reflectivity, Kurtosis and Kurtosis zero-Doppler.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_full, ...
+function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts,nst_full, ...
     prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
     qc,pa,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
     receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
@@ -39,6 +39,9 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_fu
      scid=int8(ones(size(sp_lat)))*scid ;     % spacecraft id
      % scid=double(ncread(toread,'spacecraft_num')).*ones(size(sp_lat));   % spacecraft id ol version
      
+     varID=netcdf.inqVarID(ncid, 'sv_num')  ;
+     sv_num= (netcdf.getVar(ncid,varID)) ;                                    % full space vehicle number that trasmitted prn_code 
+
      varID=netcdf.inqVarID(ncid, 'prn_code')  ;
      prn= (netcdf.getVar(ncid,varID)) ;                                    % full prn 
      % prn=ncread(toread,'prn_code');                                      % full prn old version 
@@ -163,6 +166,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_fu
              sp_lat=sp_lat(pos);
              sp_lon=sp_lon(pos);
              scid=scid(pos);
+             sv_num=sv_num(pos);
              ts=ts(pos);
              nst_full=nst_full(pos);
              prn=prn(pos);
@@ -197,6 +201,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,ts,nst_fu
              sp_lat=sp_lat(:);
              sp_lon=sp_lon(:);
              scid=scid(:);
+             sv_num=sv_num(:);
              ts=ts(:);
              nst_full=nst_full(:);
              prn=prn(:);

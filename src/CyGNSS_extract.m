@@ -230,8 +230,10 @@ if aggregate_data
     disp(['% Processing data from ' daterangechar ' and saving in a single output file'])
 
     agg_SCID=[];                                % CYGNSS sat ID
+    agg_UTC_Time=[];
     agg_SoD=[];                                 % second of the day
     agg_DoY=[];                                 % day of the year
+    agg_transmittingSpacecraft=[];              % transmitting spacecraft
     agg_PRN=[];                                 % PRN --> Prn code = prn -->trasmettitore (1 10 22 etc..)
     agg_SPLAT=[];                               % SP lat on ground
     agg_SPLON=[];                               % SP lon on ground
@@ -252,7 +254,9 @@ if aggregate_data
     agg_TE_WIDTH = [];                          % Trailing Edge (Carreno-Luengo 2020)
     agg_REFLECTIVITY_LINEAR_L1_L=[];            % Reflectivity
     agg_BRCS=[];                                % added by Hamed to save full ddm
-    agg_REFLECTIVITY_PEAK_L1_L=[] ;                  % Reflectivity peak from CyGNSS L1b products
+    agg_receivingAntenna=[];
+    agg_spAzimuthAngleDegNorth=[];
+    agg_REFLECTIVITY_PEAK_L1_L=[] ;             % Reflectivity peak from CyGNSS L1b products
     agg_QC_2=[];                                % Second Quality Flag
     agg_COHERENCY_RATIO=[] ;                    % Coherency ratio from CyGNSS L1b products
     agg_DDM_LES=[] ;                            % DDM_LES from CyGNSS L1b products
@@ -283,16 +287,18 @@ for ii=1:length(datelist)     % loop on all the days
     if  ~isempty(chkCyGNSSfile)
         disp('% Extracting CyGNSS data ...')
         [mission,L1b_product,L1b_product_version,UTC_Time, ...
-            dayOfYear,secondOfDay,receivingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit...
+            dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit...
             reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags,noise_floor,BRCS,receivingAntenna,...
-            spAzimuthAngleDegOrbit, reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd]= ...
+            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, qualityFlags_2 , coherencyRatio, ddmLes, powerRatio, pseudoStd]= ...
             extract_CyGNSS(nsat,datechar,doy,DoY_infolderpath,logpath,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
             disp(['% cat variables from day ', datechar ' to aggregated output file']);
             agg_DoY=cat(1,agg_DoY,dayOfYear(:));
             agg_SoD=cat(1,agg_SoD,secondOfDay(:));
+            agg_UTC_Time=cat(1,agg_UTC_Time,UTC_Time(:));
             agg_SCID=cat(1,agg_SCID,receivingSpacecraft(:));
+            agg_transmittingSpacecraft=cat(1,agg_transmittingSpacecraft,transmittingSpacecraft);
             agg_PRN=cat(1,agg_PRN, pseudoRandomNoise(:));
             agg_SPLAT=cat(1,agg_SPLAT, specularPointLat(:));
             agg_SPLON=cat(1,agg_SPLON, specularPointLon(:));
@@ -310,6 +316,8 @@ for ii=1:length(datelist)     % loop on all the days
             agg_QC=cat(1,agg_QC, qualityFlags(:)); 
             agg_NF=cat(1,agg_NF, noise_floor(:));
             agg_BRCS=cat(3, agg_BRCS, BRCS);   
+            agg_receivingAntenna=cat(1,agg_receivingAntenna,receivingAntenna)
+            agg_spAzimuthAngleDegNorth=cat(1,agg_spAzimuthAngleDegNorth,spAzimuthAngleDegNorth);
             agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, reflectivityPeak_L1_L(:)) ; 
             agg_QC_2=cat(1,agg_QC_2, qualityFlags_2(:)); 
             agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio(:)) ;
@@ -346,19 +354,25 @@ for ii=1:length(datelist)     % loop on all the days
   disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
         subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon <= LonMax ) ; 
-        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
+        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; transmittingSpacecraft=transmittingSpacecraft(subgeo) ;
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
         reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
-        ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
-        pseudostd=pseudostd(subgeo) ; 
+        receivingAntenna=receivingAntenna(subgeo) ; spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; 
+        qualityFlags_2=qualityFlags_2(subgeo) ; coherencyRatio=coherencyRatio(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
+        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; 
     end
-            save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
-                'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
-                'reflectivityLinear_L1_L', 'kurtosisDDM', 'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L','qualityFlags', 'noise_floor',...
-                'reflectivityPeak_L1_L', 'qualityFlags_2',  'coherencyRatio', 'ddmLes', 'powerRatio', 'notToBeUsed', 'notRecommended', 'pseudoStd', '-v7.3');
+            s=duration(0,0,toc);
+            save_file(mission, out_format, L1b_product, L1b_product_version,...
+            CyGoutpath, project_name, daterangechar, initdate, ...
+            enddate, LonMin, LonMax, LatMin, LatMax, data_coverage, s, ...
+            UTC_Time, receivingSpacecraft, transmittingSpacecraft, ...
+            pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
+            rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
+            kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
+            noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, ...
+            spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -373,7 +387,9 @@ if aggregate_data
     % Renaming variables
     dayOfYear=agg_DoY;
     secondOfDay=agg_SoD;
+    UTC_Time=agg_UTC_Time;
     receivingSpacecraft=agg_SCID;
+    transmittingSpacecraft=agg_transmittingSpacecraft;
     pseudoRandomNoise=agg_PRN;
     specularPointLat=agg_SPLAT;
     specularPointLon=agg_SPLON;
@@ -391,6 +407,8 @@ if aggregate_data
     qualityFlags=agg_QC; 
     noise_floor=agg_NF;
     BRCS=agg_BRCS;   
+    receivingAntenna=agg_receivingAntenna;
+    spAzimuthAngleDegNorth=agg_spAzimuthAngleDegNorth;
     reflectivityPeak_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
     qualityFlags_2=agg_QC_2; 
     coherencyRatio=agg_COHERENCY_RATIO ; 
@@ -419,19 +437,25 @@ if aggregate_data
     disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
         subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon <= LonMax ) ; 
-        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; 
+        dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; transmittingSpacecraft=transmittingSpacecraft(subgeo) ;
         pseudoRandomNoise=pseudoRandomNoise(subgeo) ; specularPointLat=specularPointLat(subgeo) ; specularPointLon=specularPointLon(subgeo) ; incidenceAngleDeg=incidenceAngleDeg(subgeo) ;
         rxAntennaGain_L1_L=rxAntennaGain_L1_L(subgeo) ; EIRP_L1=EIRP_L1(subgeo) ; SNR_L1_L=SNR_L1_L(subgeo) ; spAzimuthAngleDegOrbit=spAzimuthAngleDegOrbit(subgeo) ;
         reflectivityLinear_L1_L=reflectivityLinear_L1_L(subgeo) ; kurtosisDDM=kurtosisDDM(subgeo) ; kurtosisDopp0=kurtosisDopp0(subgeo) ; 
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags=qualityFlags(subgeo) ; noise_floor=noise_floor(subgeo) ;
-        reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
+        receivingAntenna=receivingAntenna(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2=qualityFlags_2(subgeo) ;  coherencyRatio=coherencyRatio(subgeo) ;
         ddmLes=ddmLes(subgeo) ; powerRatio=powerRatio(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
-        pseudostd=pseudostd(subgeo) ; 
+        spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudostd=pseudostd(subgeo) ; 
     end
-        save([CyGoutpath, '/', project_name '_' daterangechar '.mat'], 'year', 'dayOfYear', 'secondOfDay', 'receivingSpacecraft', ...  
-                'pseudoRandomNoise', 'specularPointLat', 'specularPointLon', 'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', 'spAzimuthAngleDegOrbit', ...
-                'reflectivityLinear_L1_L', 'kurtosisDDM', 'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L','qualityFlags', 'noise_floor',...
-                 'reflectivityPeak_L1_L', 'qualityFlags_2',  'coherencyRatio', 'ddmLes', 'powerRatio', 'notToBeUsed', 'notRecommended','pseudoStd','-v7.3');
+        s=duration(0,0,toc);
+        save_file(mission, out_format, L1b_product, L1b_product_version,...
+        CyGoutpath, project_name, daterangechar, initdate, ...
+        enddate, LonMin, LonMax, LatMin, LatMax, data_coverage, s, ...
+        UTC_Time, receivingSpacecraft, transmittingSpacecraft, ...
+        pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
+        rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
+        kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags, ...
+        noise_floor, reflectivityPeak_L1_L, receivingAntenna, qualityFlags_2, ...
+        spAzimuthAngleDegNorth, coherencyRatio, ddmLes, powerRatio, notToBeUsed, notRecommended);
         
 %
 end
