@@ -16,9 +16,11 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 timestamp_global_attr = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
+constellation = repmat("GPS", length(timeUTC), 1);  % crea un array colonna di stringhe
+
 if strcmpi(out_format,"Matlab")
       save(fullfile(CyGoutpath, [project_name '_' daterangechar '_' timestamp '.mat']), ...
-        'timeUTC', 'receivingSpacecraft', 'transmittingSpacecraft', ...
+        'timeUTC', 'receivingSpacecraft', 'transmittingSpacecraft', 'constellation',...
         'pseudoRandomNoise', 'spAzimuthAngleDegOrbit', 'specularPointLat', 'specularPointLon', ...
         'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', ...
         'reflectivityLinear_L1_L', 'kurtosisDDM', ...
@@ -54,6 +56,9 @@ elseif strcmpi(out_format,"netcdf")
         
         var_transmittingSpacecraft = netcdf.defVar(netcdf_cyg,'transmittingSpacecraft','NC_SHORT',dimid);
         netcdf.putAtt(netcdf_cyg, var_transmittingSpacecraft, 'transmittingSpacecraft', 'ID of the transmitting spacecraft [#]');
+
+        var_constellation = netcdf.defVar(netcdf_cyg,'constellation','NC_STRING',dimid);
+        netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constallation [ASCII]');
         
         var_pseudoRandomNoise = netcdf.defVar(netcdf_cyg,'pseudoRandomNoise','NC_SHORT',dimid);
         netcdf.putAtt(netcdf_cyg, var_pseudoRandomNoise, 'pseudoRandomNoise', 'PRN code [#]');
@@ -89,7 +94,10 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putAtt(netcdf_cyg, var_reflectivityPeak_L1_L, 'reflectivityPeak_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB] read from L1b CyGNSS data');
 
         var_reflectivityPeakRecal_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeakRecal_L1_L','NC_DOUBLE',dimid);
-        netcdf.putAtt(netcdf_cyg, var_reflectivityPeakRecal_L1_L, 'reflectivityPeakRecal_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB] re-calibrated ');
+        netcdf.putAtt(netcdf_cyg, var_reflectivityPeakRecal_L1_L, 'reflectivityPeakRecal_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB] re-calibrated');
+        
+        var_NBRCS_L1_L = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
+        netcdf.putAtt(netcdf_cyg, var_NBRCS_L1_L, 'NBRCS_L1_L', 'Normalized bistatic radar cross section of GPS signal L1, left polarization [dB]');
 
         %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
         %netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
@@ -144,6 +152,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_timeUTC, timeUTC_str);
         netcdf.putVar(netcdf_cyg, var_receivingSpacecraft, receivingSpacecraft);
         netcdf.putVar(netcdf_cyg, var_transmittingSpacecraft, transmittingSpacecraft);
+        netcdf.putVar(netcdf_cyg, var_constellation, constellation);
         netcdf.putVar(netcdf_cyg, var_pseudoRandomNoise, pseudoRandomNoise);
         netcdf.putVar(netcdf_cyg, var_spAzimuthAngleDegOrbit, spAzimuthAngleDegOrbit);
         netcdf.putVar(netcdf_cyg, var_specularPointLat, specularPointLat);
@@ -155,6 +164,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_SNR_L1_L, SNR_L1_L);
         netcdf.putVar(netcdf_cyg, var_reflectivityPeak_L1_L, reflectivityPeak_L1_L);
         netcdf.putVar(netcdf_cyg, var_reflectivityPeakRecal_L1_L, reflectivityPeakRecal_L1_L);
+        netcdf.putVar(netcdf_cyg, var_NBRCS_L1_L, NBRCS_L1_L);
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags, qualityFlags);
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2, qualityFlags_2);
         netcdf.putVar(netcdf_cyg, var_bitRatio, bitRatio);
