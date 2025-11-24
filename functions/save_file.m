@@ -13,6 +13,12 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
 
+
+maxpa=squeeze(max(powerAnalogW_L1_L(1:size(powerAnalogW_L1_L,1),1:size(powerAnalogW_L1_L,2),:,:)));
+peak=squeeze(max(maxpa(1:size(powerAnalogW_L1_L,2),:,:)));                           % peak of each DDM (tested vs for loop)
+powerAnalogW_L1_L=peak;
+
+
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 timestamp_global_attr = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
@@ -128,8 +134,8 @@ elseif strcmpi(out_format,"netcdf")
         var_bitRatio = netcdf.defVar(netcdf_cyg,'bitRatio','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_bitRatio, 'bitRatio', 'Port low/high bit counter ratio defined as (plus_1_cnts + minus_1_cnts) / (plus_3_cnts + minus_3_cnts).');
 
-        %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
-        %netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
+        var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
+        netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
 
         % End definition mode
         netcdf.endDef(netcdf_cyg);
@@ -159,9 +165,10 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_spAzimuthAngleDegOrbit, spAzimuthAngleDegOrbit);
         netcdf.putVar(netcdf_cyg, var_EIRP_L1, EIRP_L1);
         netcdf.putVar(netcdf_cyg, var_rxAntennaGain_L1_L, rxAntennaGain_L1_L);
-        %netcdf.putVar(netcdf_cyg, var_powerAnalogW_L1_L, powerAnalogW_L1_L);
+        netcdf.putVar(netcdf_cyg, var_powerAnalogW_L1_L, powerAnalogW_L1_L);
         netcdf.putVar(netcdf_cyg, var_noiseFloorCounts_L1_L, noiseFloorCounts_L1_L);
         netcdf.putVar(netcdf_cyg, var_bitRatio, bitRatio);
+        netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L)
 
 %% ------- Close netcdf file ------- %%
         netcdf.close(netcdf_cyg) ; 

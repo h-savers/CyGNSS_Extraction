@@ -20,7 +20,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
         DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA,QC,NF,BRCS, RECEIVING_ANTENNA...
         SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, REFLECTIVITY_PEAK_CALIBRATED, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO]= ...
-        extract_CyGNSS(nsat,datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
+        extract_CyGNSS(datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     timeUTC=[];
     Year=[]; 
@@ -60,9 +60,17 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
     COHERENCY_RATIO=[] ;                    % Coherency ration from L1b produt
     DDM_LES=[]  ;                           % DDM_LES from L1b product
     PR=[] ;                                 % Power ration from Mohammad M. Al-Khaldi et al., 2021
+    
+    chkfile=dir([inpath 'cyg0*.nc']);
+    length(chkfile);
+    sat_index=[];
+
+    for i=1:length(chkfile)        
+        sat_index=[sat_index, str2num(chkfile(i).name(5))];
+    end
 
 %%%%%%%%%%%%%%%%%%%%%
-    for jj=1:nsat     % loop on  the 8 satellites   
+    for jj=sat_index     % loop on  the 8 satellites   
         chkfile=dir([inpath 'cyg0' num2str(jj) '.ddmi.s' datechar '*.nc']);                    % to avoid end of execution in case file is missing
         if ~isempty(chkfile)    
             infile=chkfile.name;  
@@ -80,7 +88,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             [pr, index] = detect_coherence_v2(single(raw_counts),snr) ;
             disp('% computing pseudo standard deviation of DDM')
             pseudostd=ddm_pseudovariance(pa) ;     %     
-
+            
             disp('% computing the reflectivity calibration')
 
             lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
