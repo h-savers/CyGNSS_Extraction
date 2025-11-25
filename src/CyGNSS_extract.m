@@ -425,6 +425,7 @@ if aggregate_data
     ddmLes=agg_DDM_LES ; 
     powerRatio_L1_L=agg_POWER_RATIO ; 
     pseudoStd=agg_PSEUDOSTD ; 
+    bitRatio=agg_bitRatio ;
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
                         % 17 (low_confidence_gps_eirp_estimate)
