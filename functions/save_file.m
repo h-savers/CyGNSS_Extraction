@@ -9,14 +9,10 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         timeUTC, receivingSpacecraft, transmittingSpacecraft, ...
         pseudoRandomNoise, spAzimuthAngleDegOrbit,specularPointLat, specularPointLon, incidenceAngleDeg, ...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
-        kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
-        noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
+        kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityControlFlags_L1_L, ...
+        noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityControlFlags_2_L1_L, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
 
-
-maxpa=squeeze(max(powerAnalogW_L1_L(1:size(powerAnalogW_L1_L,1),1:size(powerAnalogW_L1_L,2),:,:)));
-peak=squeeze(max(maxpa(1:size(powerAnalogW_L1_L,2),:,:)));                           % peak of each DDM (tested vs for loop)
-powerAnalogW_L1_L=peak;
 
 
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
@@ -31,8 +27,8 @@ if strcmpi(out_format,"Matlab")
         'incidenceAngleDeg', 'rxAntennaGain_L1_L', 'EIRP_L1', 'SNR_L1_L', ...
         'reflectivityLinear_L1_L', 'kurtosisDDM', ...
         'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L', ...
-        'qualityFlags_L1_L', 'noiseFloorCounts_L1_L','reflectivityPeak_L1_L', 'reflectivityPeakRecal_L1_L',...
-        'receivingAntenna', 'qualityFlags_2_L1_L', 'bitRatio', 'spAzimuthAngleDegNorth', 'coherencyRatio_L1_L', ...
+        'qualityControlFlags_L1_L', 'noiseFloorCounts_L1_L','reflectivityPeak_L1_L', 'reflectivityPeakRecal_L1_L',...
+        'receivingAntenna', 'qualityControlFlags_2_L1_L', 'bitRatio', 'spAzimuthAngleDegNorth', 'coherencyRatio_L1_L', ...
         'ddmLes', 'powerRatio_L1_L', 'notToBeUsed', 'notRecommended','-v7.3');
     
 elseif strcmpi(out_format,"netcdf")
@@ -89,11 +85,11 @@ elseif strcmpi(out_format,"netcdf")
         var_NBRCS_L1_L = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_NBRCS_L1_L, 'NBRCS_L1_L', 'Normalized bistatic radar cross section of GPS signal L1, left polarization [dB]');
 
-        var_qualityControlFlags_L1_L = netcdf.defVar(netcdf_cyg,'qualityFlags_L1_L','NC_INT',dimid);
-        netcdf.putAtt(netcdf_cyg, var_qualityControlFlags_L1_L, 'qualityFlags_L1_L', 'First quality check flags of the observation [int32]');
+        var_qualityControlFlags_L1_L = netcdf.defVar(netcdf_cyg,'qualityControlFlags_L1_L','NC_INT',dimid);
+        netcdf.putAtt(netcdf_cyg, var_qualityControlFlags_L1_L, 'qualityControlFlags_L1_L', 'First quality check flags of the observation [int32]');
 
-        var_qualityControlFlags_2_L1_L = netcdf.defVar(netcdf_cyg,'qualityFlags_2_L1_L','NC_INT',dimid);
-        netcdf.putAtt(netcdf_cyg, var_qualityControlFlags_2_L1_L, 'qualityFlags_2_L1_L', 'Second quality check flags of the observation [int32]');
+        var_qualityControlFlags_2_L1_L = netcdf.defVar(netcdf_cyg,'qualityControlFlags_2_L1_L','NC_INT',dimid);
+        netcdf.putAtt(netcdf_cyg, var_qualityControlFlags_2_L1_L, 'qualityControlFlags_2_L1_L', 'Second quality check flags of the observation [int32]');
 
         var_notToBeUsed = netcdf.defVar(netcdf_cyg,'notToBeUsed','NC_BYTE',dimid);
         netcdf.putAtt(netcdf_cyg, var_notToBeUsed, 'notToBeUsed', ['Quality flag based on L1b flags indicating reflection not to be used (1 indicates bad quality).']);
@@ -134,8 +130,8 @@ elseif strcmpi(out_format,"netcdf")
         var_bitRatio = netcdf.defVar(netcdf_cyg,'bitRatio','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_bitRatio, 'bitRatio', 'Port low/high bit counter ratio defined as (plus_1_cnts + minus_1_cnts) / (plus_3_cnts + minus_3_cnts).');
 
-        var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
-        netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
+        %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
+        %netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
 
         % End definition mode
         netcdf.endDef(netcdf_cyg);
@@ -153,8 +149,8 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_reflectivityPeak_L1_L, reflectivityPeak_L1_L);
         netcdf.putVar(netcdf_cyg, var_reflectivityPeakRecal_L1_L, reflectivityPeakRecal_L1_L);
         netcdf.putVar(netcdf_cyg, var_NBRCS_L1_L, NBRCS_L1_L);
-        netcdf.putVar(netcdf_cyg, var_qualityControlFlags_L1_L, qualityFlags_L1_L);
-        netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2_L1_L, qualityFlags_2_L1_L);
+        netcdf.putVar(netcdf_cyg, var_qualityControlFlags_L1_L, qualityControlFlags_L1_L);
+        netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2_L1_L, qualityControlFlags_2_L1_L);
         netcdf.putVar(netcdf_cyg, var_notToBeUsed, uint8(notToBeUsed));
         netcdf.putVar(netcdf_cyg, var_notRecommended, uint8(notRecommended));
         netcdf.putVar(netcdf_cyg, var_constellation, constellation);
@@ -168,7 +164,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_powerAnalogW_L1_L, powerAnalogW_L1_L);
         netcdf.putVar(netcdf_cyg, var_noiseFloorCounts_L1_L, noiseFloorCounts_L1_L);
         netcdf.putVar(netcdf_cyg, var_bitRatio, bitRatio);
-        netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L)
+        %netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L)
 
 %% ------- Close netcdf file ------- %%
         netcdf.close(netcdf_cyg) ; 
