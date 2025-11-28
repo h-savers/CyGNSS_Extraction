@@ -303,7 +303,7 @@ for ii=1:length(datelist)     % loop on all the days
             agg_SoD=cat(1,agg_SoD,secondOfDay(:));
             agg_timeUTC=cat(1,agg_timeUTC,timeUTC(:));
             agg_SCID=cat(1,agg_SCID,receivingSpacecraft(:));
-            agg_transmittingSpacecraft=cat(1,agg_transmittingSpacecraft,transmittingSpacecraft);
+            agg_transmittingSpacecraft=cat(1,agg_transmittingSpacecraft,transmittingSpacecraft(:));
             agg_PRN=cat(1,agg_PRN, pseudoRandomNoise(:));
             agg_SPLAT=cat(1,agg_SPLAT, specularPointLat(:));
             agg_SPLON=cat(1,agg_SPLON, specularPointLon(:));
@@ -347,6 +347,7 @@ for ii=1:length(datelist)     % loop on all the days
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
                     oqf2=(bitget(qualityFlags_2_L1_L,12) | bitget(qualityFlags_2_L1_L,18));
+                    oqf3=(transmittingSpacecraft == 34) | (transmittingSpacecraft == 47);
                     notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended= SNR_L1_L > snr_th & ...               % Not recommende logical QC index. It is '1' if sample is suspicious
@@ -437,7 +438,8 @@ if aggregate_data
                         % 12 (overall)
                         % 18 (preliminary_gps_ant_knowledge)
                     oqf2=(bitget(qualityFlags_2_L1_L,12) | bitget(qualityFlags_2_L1_L,18));
-                    notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
+                    oqf3=(transmittingSpacecraft == 34) | (transmittingSpacecraft == 47);
+                    notToBeUsed=(oqf1|oqf2|oqf3) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
                     rxAntennaGain_L1_L < rx_gain_th | ...

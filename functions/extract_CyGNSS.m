@@ -94,7 +94,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             disp('% computing the reflectivity calibration')
 
             lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
-            decimation_factor = -9999 * ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
+            decimation_factor = ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
             [~, mask_idx] = ismember(lookup, calibration_table(:,1:3), 'rows'); % check the corrispondence between the two matrices
             valid = mask_idx > 0; % check the logic indices
             decimation_factor(valid) = calibration_table(mask_idx(valid), 4); % extract the decimation factor from the calibration_table
