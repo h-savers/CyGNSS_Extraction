@@ -13,7 +13,7 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityControlFlags_2_L1_L, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
 
-
+powerRatio_L1_L=single(powerRatio_L1_L) ; 
 
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 timestamp_global_attr = datestr(now, 'yyyy-mm-dd HH:MM:SS');
@@ -53,26 +53,26 @@ elseif strcmpi(out_format,"netcdf")
         var_timeUTC = netcdf.defVar(netcdf_cyg,'timeUTC','NC_STRING',dimid);
         netcdf.putAtt(netcdf_cyg, var_timeUTC, 'timeUTC', 'Time of observation in UTC');
         
-        var_specularPointLat = netcdf.defVar(netcdf_cyg,'specularPointLat','NC_DOUBLE',dimid);
+        var_specularPointLat = netcdf.defVar(netcdf_cyg,'specularPointLat','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_specularPointLat, 'specularPointLat', 'Latitude of observation [deg]');
 
-        var_specularPointLon = netcdf.defVar(netcdf_cyg,'specularPointLon','NC_DOUBLE',dimid);
+        var_specularPointLon = netcdf.defVar(netcdf_cyg,'specularPointLon','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_specularPointLon, 'specularPointLon', 'Longitude of observation [deg]');
         
-        var_incidenceAngleDeg = netcdf.defVar(netcdf_cyg,'incidenceAngleDeg','NC_DOUBLE',dimid);
+        var_incidenceAngleDeg = netcdf.defVar(netcdf_cyg,'incidenceAngleDeg','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_incidenceAngleDeg, 'incidenceAngleDeg', 'Incidence angle at specular point [deg]');
 
-        var_spAzimuthAngleDegNorth = netcdf.defVar(netcdf_cyg,'spAzimuthAngleDegNorth','NC_DOUBLE',dimid);
+        var_spAzimuthAngleDegNorth = netcdf.defVar(netcdf_cyg,'spAzimuthAngleDegNorth','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_spAzimuthAngleDegNorth, 'spAzimuthAngleDegNorth', 'Azimuth angle at specular point with respect to North [deg]');
 
-        var_SNR_L1_L = netcdf.defVar(netcdf_cyg,'SNR_L1_L','NC_DOUBLE',dimid);
+        var_SNR_L1_L = netcdf.defVar(netcdf_cyg,'SNR_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_SNR_L1_L, 'SNR_L1_L', 'Signal to noise ratio of signal L1 and left polarization [dB]');
 
-        var_powerRatio_L1_L = netcdf.defVar(netcdf_cyg,'powerRatio_L1_L','NC_DOUBLE',dimid);
+        var_powerRatio_L1_L = netcdf.defVar(netcdf_cyg,'powerRatio_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_powerRatio_L1_L, 'powerRatio_L1_L', ['Estimation of the degree of coherency based on the algorithm proposed in ' ...
             'https://doi.org/10.1109/TGRS.2020.3009784 applied to ddm raw counts']);
 
-        var_coherencyRatio_L1_L = netcdf.defVar(netcdf_cyg,'coherencyRatio_L1_L','NC_DOUBLE',dimid);
+        var_coherencyRatio_L1_L = netcdf.defVar(netcdf_cyg,'coherencyRatio_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_coherencyRatio_L1_L, 'long_name', ['Estimation of the ratio of received power between the central bins ' ...
             'and periphery bins of the raw_counts DDM after the elimination of noise bins']);
         
@@ -82,7 +82,7 @@ elseif strcmpi(out_format,"netcdf")
         var_reflectivityPeakRecal_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityPeakRecal_L1_L','NC_DOUBLE',dimid);
         netcdf.putAtt(netcdf_cyg, var_reflectivityPeakRecal_L1_L, 'reflectivityPeakRecal_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB] re-calibrated');
 
-        var_NBRCS_L1_L = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_DOUBLE',dimid);
+        var_NBRCS_L1_L = netcdf.defVar(netcdf_cyg,'NBRCS_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_NBRCS_L1_L, 'NBRCS_L1_L', 'Normalized bistatic radar cross section of GPS signal L1, left polarization [dB]');
 
         var_qualityControlFlags_L1_L = netcdf.defVar(netcdf_cyg,'qualityControlFlags_L1_L','NC_INT',dimid);
@@ -100,7 +100,7 @@ elseif strcmpi(out_format,"netcdf")
         var_constellation = netcdf.defVar(netcdf_cyg,'constellation','NC_STRING',dimid);
         netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constallation [ASCII]');
 
-        var_recevingAntenna = netcdf.defVar(netcdf_cyg,'receivingAntenna','NC_DOUBLE',dimid);
+        var_recevingAntenna = netcdf.defVar(netcdf_cyg,'receivingAntenna','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_recevingAntenna, 'receivingAntenna', ['Antenna collecting the signal']);
 
         var_receivingSpacecraft = netcdf.defVar(netcdf_cyg,'receivingSpacecraft','NC_SHORT',dimid);
@@ -112,22 +112,22 @@ elseif strcmpi(out_format,"netcdf")
         var_pseudoRandomNoise = netcdf.defVar(netcdf_cyg,'pseudoRandomNoise','NC_SHORT',dimid);
         netcdf.putAtt(netcdf_cyg, var_pseudoRandomNoise, 'pseudoRandomNoise', 'PRN code [#]');
         
-        var_spAzimuthAngleDegOrbit = netcdf.defVar(netcdf_cyg,'spAzimuthAngleDegOrbit','NC_DOUBLE',dimid);
+        var_spAzimuthAngleDegOrbit = netcdf.defVar(netcdf_cyg,'spAzimuthAngleDegOrbit','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_spAzimuthAngleDegOrbit, 'spAzimuthAngleDegOrbit', 'Azimuth angle at specular point in the orbit frame [deg]');
 
-        var_EIRP_L1 = netcdf.defVar(netcdf_cyg,'EIRP_L1','NC_DOUBLE',dimid);
+        var_EIRP_L1 = netcdf.defVar(netcdf_cyg,'EIRP_L1','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_EIRP_L1, 'EIRP_L1', 'Effective Isotropic Radiated Power [Watt]');
 
-        var_rxAntennaGain_L1_L = netcdf.defVar(netcdf_cyg,'rxAntennaGain_L1_L','NC_DOUBLE',dimid);
+        var_rxAntennaGain_L1_L = netcdf.defVar(netcdf_cyg,'rxAntennaGain_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_rxAntennaGain_L1_L, 'rxAntennaGain_L1_L', 'Receiver antenna gain toward specular point [dB]');
 
-        var_powerAnalogW_L1_L = netcdf.defVar(netcdf_cyg,'powerAnalogW_L1_L','NC_DOUBLE',dimid);
+        var_powerAnalogW_L1_L = netcdf.defVar(netcdf_cyg,'powerAnalogW_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_powerAnalogW_L1_L, 'powerAnalogW_L1_L', 'Peak power of the DDM. It the true power that would have been measured by an ideal (analog) power sensor and corrected for quantization effects [Watt]');
  
-        var_noiseFloorCounts_L1_L = netcdf.defVar(netcdf_cyg,'noiseFloorCounts_L1_L','NC_DOUBLE',dimid);
+        var_noiseFloorCounts_L1_L = netcdf.defVar(netcdf_cyg,'noiseFloorCounts_L1_L','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_noiseFloorCounts_L1_L, 'noiseFloorCounts_L1_L', 'Noise floor of the DDM [Watt]');
         
-        var_bitRatio = netcdf.defVar(netcdf_cyg,'bitRatio','NC_DOUBLE',dimid);
+        var_bitRatio = netcdf.defVar(netcdf_cyg,'bitRatio','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_bitRatio, 'bitRatio', 'Port low/high bit counter ratio defined as (plus_1_cnts + minus_1_cnts) / (plus_3_cnts + minus_3_cnts).');
 
         %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);

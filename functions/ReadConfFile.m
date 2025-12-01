@@ -1,6 +1,6 @@
 function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, ...
     LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format, ...
-    snr_th, rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath)
+    snr_th, rx_gain_th, inc_angl_th, nsnr_th, coherency_th] = ReadConfFile(configurationPath)
 %%%%%%%  Read configuration file
 %
             lines = string(splitlines(fileread(configurationPath)));
@@ -111,5 +111,12 @@ function [Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath
             startIndex= regexp(lines(ConfigRightLine),'=') ; 
             nsnr_th= extractAfter(lines(ConfigRightLine),startIndex) ;
             nsnr_th=double(nsnr_th) ; 
+
+            ConfigRightLine= contains(lines,'coherency_th')  ;             % minimum coherency ratio
+            ConfigRightLine= find(ConfigRightLine==1)  ;   
+            startIndex= regexp(lines(ConfigRightLine),'=') ; 
+            coherency_th= extractAfter(lines(ConfigRightLine),startIndex) ;
+            coherency_th=double(coherency_th) ; 
+
 
 end

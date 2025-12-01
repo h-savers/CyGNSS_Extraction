@@ -1,6 +1,6 @@
 function WriteConfig(configurationPath,Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, ...
     LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
-    snr_th, rx_gain_th, inc_angl_th, nsnr_th)
+    snr_th, rx_gain_th, inc_angl_th, nsnr_th, coherency_th)
 conffileID = fopen(configurationPath, 'W') ; 
 % conffileID = fopen(configurationPath) ; 
 fprintf(conffileID,'%s',['Taskname=' Taskname] ); fprintf(conffileID,'\n') ; 
@@ -30,6 +30,8 @@ fprintf(conffileID,['snr_dB_th=' char(string(snr_th))] ); fprintf(conffileID,'\n
 fprintf(conffileID,['rx_gain_dB_th=' char(string(rx_gain_th))] ); fprintf(conffileID,'\n') ; 
 fprintf(conffileID,['inc_angl_th=' char(string(inc_angl_th))] ); fprintf(conffileID,'\n') ; 
 fprintf(conffileID,['nsnr_th=' char(string(nsnr_th))] ); fprintf(conffileID,'\n') ; 
+fprintf(conffileID,['coherency_th=' char(string(coherency_th))] ); fprintf(conffileID,'\n') ; 
+
 
 fclose(conffileID) ;
 end
