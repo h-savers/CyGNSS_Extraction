@@ -11,7 +11,7 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityControlFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityControlFlags_2_L1_L, bitRatio, ...
-        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
+        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation);
 
 powerRatio_L1_L=single(powerRatio_L1_L) ; 
 
@@ -29,7 +29,7 @@ if strcmpi(out_format,"Matlab")
         'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L', ...
         'qualityControlFlags_L1_L', 'noiseFloorCounts_L1_L','reflectivityPeak_L1_L', 'reflectivityPeakRecal_L1_L',...
         'receivingAntenna', 'qualityControlFlags_2_L1_L', 'bitRatio', 'spAzimuthAngleDegNorth', 'coherencyRatio_L1_L', ...
-        'ddmLes', 'powerRatio_L1_L', 'notToBeUsed', 'notRecommended','-v7.3');
+        'ddmLes', 'powerRatio_L1_L', 'notToBeUsed', 'notRecommended','coefficientOfVariation','-v7.3');
     
 elseif strcmpi(out_format,"netcdf")
     % Create NetCDF file
@@ -39,7 +39,7 @@ elseif strcmpi(out_format,"netcdf")
         dimid = netcdf.defDim(netcdf_cyg, 'record', length(timeUTC));
     
         % Assign global attributes
-        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File name', [project_name, '_' daterangechar, '.nc']);
+        netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File name', [project_name '_' daterangechar '_' timestamp '.nc']);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'File generation time [yyyy-mm-dd HH:MM:SS]', [string(timestamp_global_attr)]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'Mission', [mission]);
         netcdf.putAtt(netcdf_cyg, netcdf.getConstant("NC_GLOBAL"), 'L1b product', [L1b_product]);
@@ -97,19 +97,22 @@ elseif strcmpi(out_format,"netcdf")
         var_notRecommended = netcdf.defVar(netcdf_cyg,'notRecommended','NC_BYTE',dimid);
         netcdf.putAtt(netcdf_cyg, var_notRecommended, 'notRecommended', ['Quality flag based on L1B variables that are beyond thresholds defined in the configuration file. When it is 1 (i.e., flag is up) reflection is suspicious.']);
 
+        var_uncertainty = netcdf.defVar(netcdf_cyg,'errorUncertainty','NC_FLOAT',dimid);
+        netcdf.putAtt(netcdf_cyg, var_uncertainty, 'errorUncertainty', ['Error standard deviation of observation estiamated from SNR/coherence or other parameters ']);
+
         var_constellation = netcdf.defVar(netcdf_cyg,'constellation','NC_STRING',dimid);
         netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constallation [ASCII]');
 
         var_recevingAntenna = netcdf.defVar(netcdf_cyg,'receivingAntenna','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_recevingAntenna, 'receivingAntenna', ['Antenna collecting the signal']);
 
-        var_receivingSpacecraft = netcdf.defVar(netcdf_cyg,'receivingSpacecraft','NC_SHORT',dimid);
+        var_receivingSpacecraft = netcdf.defVar(netcdf_cyg,'receivingSpacecraft','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_receivingSpacecraft, 'receivingSpacecraft', 'ID of the receiving spacecraft');
 
-        var_transmittingSpacecraft = netcdf.defVar(netcdf_cyg,'transmittingSpacecraft','NC_SHORT',dimid);
+        var_transmittingSpacecraft = netcdf.defVar(netcdf_cyg,'transmittingSpacecraft','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_transmittingSpacecraft, 'transmittingSpacecraft', 'ID of the transmitting spacecraft [#]');
 
-        var_pseudoRandomNoise = netcdf.defVar(netcdf_cyg,'pseudoRandomNoise','NC_SHORT',dimid);
+        var_pseudoRandomNoise = netcdf.defVar(netcdf_cyg,'pseudoRandomNoise','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_pseudoRandomNoise, 'pseudoRandomNoise', 'PRN code [#]');
         
         var_spAzimuthAngleDegOrbit = netcdf.defVar(netcdf_cyg,'spAzimuthAngleDegOrbit','NC_FLOAT',dimid);
@@ -153,6 +156,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_qualityControlFlags_2_L1_L, qualityControlFlags_2_L1_L);
         netcdf.putVar(netcdf_cyg, var_notToBeUsed, uint8(notToBeUsed));
         netcdf.putVar(netcdf_cyg, var_notRecommended, uint8(notRecommended));
+        netcdf.putVar(netcdf_cyg, var_uncertainty, coefficientOfVariation);
         netcdf.putVar(netcdf_cyg, var_constellation, constellation);
         netcdf.putVar(netcdf_cyg, var_recevingAntenna, receivingAntenna);
         netcdf.putVar(netcdf_cyg, var_receivingSpacecraft, receivingSpacecraft);

@@ -135,8 +135,6 @@ LonMin=double(string(LonMin)) ; LonMax=double(string(LonMax)) ;
 end
 
 
-
-
 % clear all
 % close all
 % addpath('src/CyGNSS_Extraction/new_version/functions/')
@@ -267,6 +265,7 @@ if aggregate_data
     agg_POWER_RATIO=[] ;                        % Power raio from Mohammad M. Al-Khaldi et al., 2021
     agg_PSEUDOSTD=[] ; 
     agg_bitRatio=[] ;
+    agg_coefficientOfVariation=[] ;
 
 else
     disp('% Processing each day separately and saving individual output files');
@@ -294,7 +293,7 @@ for ii=1:length(datelist)     % loop on all the days
         [mission,L1b_product,L1b_product_version,timeUTC, ...
             dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit,...
             reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags_L1_L,noiseFloorCounts_L1_L,BRCS,receivingAntenna,...
-            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2_L1_L , coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, pseudoStd, bitRatio]= ...
+            spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2_L1_L , coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, pseudoStd, bitRatio,coefficientOfVariation]= ...
             extract_CyGNSS(datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);  
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -330,9 +329,9 @@ for ii=1:length(datelist)     % loop on all the days
             agg_COHERENCY_RATIO=cat(1, agg_COHERENCY_RATIO, coherencyRatio_L1_L(:)) ;
             agg_DDM_LES=cat(1, agg_DDM_LES,ddmLes(:)) ; 
             agg_POWER_RATIO=cat(1, agg_POWER_RATIO,powerRatio_L1_L(:)) ; 
-            agg_PSEUDOSTD=cat(1, agg_PSEUDOSTD, pseudoStd) ; 
-            agg_bitRatio=cat(1,agg_bitRatio, bitRatio) ;
-
+            agg_PSEUDOSTD=cat(1, agg_PSEUDOSTD, pseudoStd(:)) ; 
+            agg_bitRatio=cat(1,agg_bitRatio, bitRatio(:)) ;
+            agg_coefficientOfVariation=cat(1,agg_coefficientOfVariation, coefficientOfVariation(:)) ;
 
             % agg_RXRANGE=cat(1,agg_RXRANGE,RXRANGE); % these variables are extracted in extract_CyGNSS function, but then they are not passed to the function output. Ask Hamed why
             % agg_TXRANGE=cat(1,agg_TXRANGE,TXRANGE);
@@ -373,7 +372,7 @@ for ii=1:length(datelist)     % loop on all the days
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; reflectivityPeakRecal_L1_L=reflectivityPeakRecal_L1_L(subgeo) ;
         qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ; coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
-        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ;
+        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
     end
             s=duration(0,0,toc);
             save_file(mission, out_format, L1b_product, L1b_product_version,...
@@ -384,7 +383,7 @@ for ii=1:length(datelist)     % loop on all the days
             rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
             kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
             noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
-            spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
+            spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended,coefficientOfVariation);
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -429,6 +428,7 @@ if aggregate_data
     powerRatio_L1_L=agg_POWER_RATIO ; 
     pseudoStd=agg_PSEUDOSTD ; 
     bitRatio=agg_bitRatio ;
+    coefficientOfVariation=agg_coefficientOfVariation ;
     % apply quality check and filtering
                         % Quality flag 1 - currently using bits:
                         % 17 (low_confidence_gps_eirp_estimate)
@@ -460,7 +460,7 @@ if aggregate_data
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ;  coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ;
         ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
-        spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudostd=pseudostd(subgeo) ; 
+        spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
     end
         s=duration(0,0,toc);
         save_file(mission, out_format, L1b_product, L1b_product_version,...
@@ -471,7 +471,7 @@ if aggregate_data
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
-        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended);
+        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation);
         
         
 %

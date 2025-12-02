@@ -19,7 +19,7 @@
 function [mission,L1b_product,L1b_product_version,timeUTC, ...
         DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA_PEAK,QC,NF,BRCS, RECEIVING_ANTENNA...
-        SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, REFLECTIVITY_PEAK_CALIBRATED, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO]= ...
+        SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, REFLECTIVITY_PEAK_CALIBRATED, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO,COEFFICIENT_OF_VARIATION]= ...
         extract_CyGNSS(datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
 
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,7 +62,8 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
     COHERENCY_RATIO=[] ;                    % Coherency ration from L1b produt
     DDM_LES=[]  ;                           % DDM_LES from L1b product
     PR=[] ;                                 % Power ration from Mohammad M. Al-Khaldi et al., 2021
-    
+    COEFFICIENT_OF_VARIATION=[] ;
+
     chkfile=dir([inpath 'cyg0*.nc']);
     length(chkfile);
     sat_index=[];
@@ -81,16 +82,20 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
             qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
             receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
-            raw_counts,bit_ratio,calibration_table]=readnc_CyGNSS_v2(inpath,infile,calibration_file,lambda,Doppler_bins,savespace); 
-        
+            raw_counts,bit_ratio,calibration_table,sampling_seconds]=readnc_CyGNSS_v2(inpath,infile,calibration_file,lambda,Doppler_bins,savespace); 
+            
+            disp('% computing coefficient of variation')
+            Nlook=sampling_seconds*10^3 ;
+            SNRlinear=10.^snr/10 ;
+            KP=sqrt((1+1./SNRlinear).^2+(1./SNRlinear).^2)/sqrt(Nlook) ;
+
             disp('% computing  Trailing Edge')                     
             TE_width=computeTE(double(pa),delay_vector,Power_threshold);  
             disp('% computing  peak ratio')                       
 %             [pr, index] = detect_coherence_v2(pa,snr) ;
             [pr, index] = detect_coherence_v2(single(raw_counts),snr) ;
             disp('% computing pseudo standard deviation of DDM')
-            pseudostd=ddm_pseudovariance(pa) ;     %     
-            
+            pseudostd=ddm_pseudovariance(pa) ;     %    
             disp('% computing the reflectivity calibration')
 
             lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
@@ -135,7 +140,6 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             SP_AZIMUTH_ANGLE=cat(1,SP_AZIMUTH_ANGLE,sp_azimuth_angle_deg_north);
             RECEIVING_ANTENNA=cat(1,RECEIVING_ANTENNA,receivingantenna);
             BRCS=cat(3, BRCS, brcs);                                       % added by Hamed to keep full ddm
-
             REFLECTIVITY_PEAK=cat(1,REFLECTIVITY_PEAK,reflectivity_peak);  
             REFLECTIVITY_PEAK_CALIBRATED=cat(1,REFLECTIVITY_PEAK_CALIBRATED,reflectivity_peak_calibrated);
             QC_2=cat(1,QC_2, qc_2(:));
@@ -144,6 +148,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             PR=cat(1,PR, pr) ; 
             PSEUDOSTD=cat(1,PSEUDOSTD, pseudostd) ; 
             BIT_RATIO=cat(1,BIT_RATIO, bit_ratio) ;
+            COEFFICIENT_OF_VARIATION=cat(1,COEFFICIENT_OF_VARIATION,KP) ;
 
         else
             diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])

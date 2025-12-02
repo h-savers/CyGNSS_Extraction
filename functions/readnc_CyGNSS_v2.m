@@ -7,7 +7,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
     prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
     qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
     receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
-    raw_counts,bit_ratio,calibration_table]= ...
+    raw_counts,bit_ratio,calibration_table,sampling_seconds]= ...
     readnc_CyGNSS_v2(inpath,filename,calibration_file,lambda,Doppler_bins,savespace)
 
      % Reading the lookup table for the calibration
@@ -26,6 +26,11 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      mission=ncreadatt(toread,'/',"project");
      L1b_product=ncreadatt(toread,'/',"title");
      L1b_product_version=ncreadatt(toread,'/',"l1_algorithm_version");
+
+     % Extract time resolution from global attributes
+     time_resolution_coverage=ncreadatt(toread,'/',"time_coverage_resolution");
+     seconds_str = regexp(time_resolution_coverage, '([\d\.]+)S', 'tokens');
+     sampling_seconds = str2double(seconds_str{1});
 
      disp('% reading lat/lon')
      
@@ -54,8 +59,8 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      varID=netcdf.inqVarID(ncid, 'ddm_timestamp_utc')  ;
      ts=netcdf.getVar(ncid,varID) ; 
      ts=repmat(ts',4,1);                                                   % time in seconds since 2017-03-27 00:00:00.999261529
-     % ts=repmat(ncread(toread,'ddm_timestamp_utc')',4,1);                 % time in seconds since 2017-03-27 00:00:00.999261529 old version
-            
+     % ts=repmat(ncread(toread,'ddm_timestamp_utc')',4,1);                 % time in seconds since 2017-03-27 00:00:00.999261529 old version                   
+
      disp('% reading observables ')
      varID=netcdf.inqVarID(ncid, 'nst_att_status')  ;
      nst_full=netcdf.getVar(ncid,varID) ; 
