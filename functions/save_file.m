@@ -98,7 +98,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putAtt(netcdf_cyg, var_notRecommended, 'notRecommended', ['Quality flag based on L1B variables that are beyond thresholds defined in the configuration file. When it is 1 (i.e., flag is up) reflection is suspicious.']);
 
         var_uncertainty = netcdf.defVar(netcdf_cyg,'errorUncertainty','NC_FLOAT',dimid);
-        netcdf.putAtt(netcdf_cyg, var_uncertainty, 'errorUncertainty', ['Error standard deviation of observation estiamated from SNR/coherence or other parameters ']);
+        netcdf.putAtt(netcdf_cyg, var_uncertainty, 'errorUncertainty', ['Coefficient of variation of observation estimated from SNR and incoherent integration']);
 
         var_constellation = netcdf.defVar(netcdf_cyg,'constellation','NC_STRING',dimid);
         netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constallation [ASCII]');

@@ -348,13 +348,15 @@ for ii=1:length(datelist)     % loop on all the days
                         % 18 (preliminary_gps_ant_knowledge)
                     oqf2=(bitget(qualityFlags_2_L1_L,12) | bitget(qualityFlags_2_L1_L,18));
                     oqf3=(transmittingSpacecraft == 34) | (transmittingSpacecraft == 47);
-                    notToBeUsed=(oqf1|oqf2) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
+                    notToBeUsed=(oqf1|oqf2|oqf3) ;                            % Not to be uses sample logical QC index. It is '1' if sample is not recommended
 
                     notRecommended=( SNR_L1_L < snr_th | ...               % Not recommende logical QC index. It is '1' if sample is suspicious
                     rxAntennaGain_L1_L < rx_gain_th | ...
                     incidenceAngleDeg > inc_angl_th | ...
                     coherencyRatio_L1_L < coherency_th    ); % & ...
-                    % nsnr_dB < nsnr_th;                             
+                    % nsnr_dB < nsnr_th;
+
+
 %
        %%%%% save individual day data 
   disp('% saving CyGNSS data daily');

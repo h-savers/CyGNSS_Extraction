@@ -222,7 +222,6 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              coherency_ratio=coherency_ratio(pos);
              ddm_les=ddm_les(pos);
 
-
      else
              sp_lat=sp_lat(:);
              sp_lon=sp_lon(:);
