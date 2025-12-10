@@ -101,7 +101,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putAtt(netcdf_cyg, var_uncertainty, 'errorUncertainty', ['Coefficient of variation of observation estimated from SNR and incoherent integration']);
 
         var_constellation = netcdf.defVar(netcdf_cyg,'constellation','NC_STRING',dimid);
-        netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constallation [ASCII]');
+        netcdf.putAtt(netcdf_cyg, var_constellation, 'constellation', 'Name of the constellation [ASCII]');
 
         var_recevingAntenna = netcdf.defVar(netcdf_cyg,'receivingAntenna','NC_INT',dimid);
         netcdf.putAtt(netcdf_cyg, var_recevingAntenna, 'receivingAntenna', ['Antenna collecting the signal']);

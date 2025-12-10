@@ -20,7 +20,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      % using ncread
      disp('% opening file ')
      ncid = netcdf.open(toread, 'NC_NOWRITE');
-% trackNcids = netcdf.inqGrps(ncid);
+     % trackNcids = netcdf.inqGrps(ncid);
      
      % Read global attributes
      mission=ncreadatt(toread,'/',"project");
