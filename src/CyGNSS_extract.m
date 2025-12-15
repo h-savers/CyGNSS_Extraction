@@ -9,6 +9,10 @@ function CyGNSS_extract(configurationPath)
 close all
 clearvars -except configurationPath
 
+[~, sys] = memory;
+mem_before = sys.PhysicalMemory.Available;
+
+
 ex=exist('configurationPath') ;
 if ex ==0
     mode="GUI" ;
@@ -228,7 +232,7 @@ lambda=0.1903;                                                             % 0.1
 %%%%%%%%%%%%%%%%%%%%% INITIALIZING EMPTY VARIABLES FOR AGGREGATED SINGLE OUTPUT FILE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if aggregate_data
     daterangechar = [datestr(initdatenum,'yyyymmdd') '-' datestr(enddatenum,'yyyymmdd')]; % date range for aggregated output file
-    disp(['% Processing data from ' daterangechar ' and saving in a single output file'])
+    %disp(['% Processing data from ' daterangechar ' and saving in a single output file'])
 
     agg_SCID=[];                                % CYGNSS sat ID
     agg_timeUTC=[];
@@ -289,16 +293,16 @@ for ii=1:length(datelist)     % loop on all the days
     %%%%%%%%%%%%%%%%%%%%%% CyGNSS data extraction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     chkCyGNSSfile=dir([DoY_infolderpath 'cyg0*.ddmi.s' datechar '*.nc']);
     if  ~isempty(chkCyGNSSfile)
-        disp('% Extracting CyGNSS data ...')
+        %disp('% Extracting CyGNSS data ...')
         [mission,L1b_product,L1b_product_version,timeUTC, ...
             dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit,...
-            reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags_L1_L,noiseFloorCounts_L1_L,BRCS,receivingAntenna,...
+            reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags_L1_L,noiseFloorCounts_L1_L,receivingAntenna,...
             spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2_L1_L , coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, pseudoStd, bitRatio,coefficientOfVariation]= ...
             extract_CyGNSS(datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);  
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data
-            disp(['% cat variables from day ', datechar ' to aggregated output file']);
+            %disp(['% cat variables from day ', datechar ' to aggregated output file']);
             agg_DoY=cat(1,agg_DoY,dayOfYear(:));
             agg_SoD=cat(1,agg_SoD,secondOfDay(:));
             agg_timeUTC=cat(1,agg_timeUTC,timeUTC(:));
@@ -320,7 +324,7 @@ for ii=1:length(datelist)     % loop on all the days
             agg_PA_L1_L=cat(1,agg_PA_L1_L, powerAnalogW_L1_L(:));
             agg_QC=cat(1,agg_QC, qualityFlags_L1_L(:)); 
             agg_NF=cat(1,agg_NF, noiseFloorCounts_L1_L(:));
-            agg_BRCS=cat(3, agg_BRCS, BRCS);   
+            %agg_BRCS=cat(3, agg_BRCS, BRCS);   
             agg_receivingAntenna=cat(1,agg_receivingAntenna,receivingAntenna);
             agg_spAzimuthAngleDegNorth=cat(1,agg_spAzimuthAngleDegNorth,spAzimuthAngleDegNorth);
             agg_REFLECTIVITY_PEAK_L1_L=cat(1, agg_REFLECTIVITY_PEAK_L1_L, reflectivityPeak_L1_L(:)) ; 
@@ -419,7 +423,7 @@ if aggregate_data
     powerAnalogW_L1_L=agg_PA_L1_L;
     qualityFlags_L1_L=agg_QC; 
     noiseFloorCounts_L1_L=agg_NF;
-    BRCS=agg_BRCS;   
+    %BRCS=agg_BRCS;   
     receivingAntenna=agg_receivingAntenna;
     spAzimuthAngleDegNorth=agg_spAzimuthAngleDegNorth;
     reflectivityPeak_L1_L=agg_REFLECTIVITY_PEAK_L1_L ; 
@@ -452,7 +456,7 @@ if aggregate_data
                     % nsnr_dB < nsnr_th;                             
     %
     % Saving aggregated data
-    disp('% Saving aggregated data in a single output file')
+    %disp('% Saving aggregated data in a single output file')
     if LatMin ~= -90 & LatMax  ~= 90 & LonMin  ~= -180 & LonMax ~= 180 
         subgeo=find(specularPointLat >= LatMin & specularPointLat <= LatMax & specularPointLon >= LonMin & specularPointLon <= LonMax ) ; 
         dayOfYear=dayOfYear(subgeo) ; secondOfDay=secondOfDay(subgeo) ; receivingSpacecraft=receivingSpacecraft(subgeo) ; transmittingSpacecraft=transmittingSpacecraft(subgeo) ;
@@ -474,7 +478,6 @@ if aggregate_data
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation);
-        
         
 %
 end

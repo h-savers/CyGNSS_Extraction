@@ -5,20 +5,20 @@
 
 function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts,nst_full, ...
     prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
-    qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, brcs, reflectivity_peak, ...
+    qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, reflectivity_peak, ...
     receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
     raw_counts,bit_ratio,calibration_table,sampling_seconds]= ...
     readnc_CyGNSS_v2(inpath,filename,calibration_file,lambda,Doppler_bins,savespace)
 
      % Reading the lookup table for the calibration
-     disp("% opening the lookup table for reflectivity calibration")
+     %disp("% opening the lookup table for reflectivity calibration")
      calibration_table = readtable(calibration_file, 'Delimiter', ',');
      calibration_table = table2array(calibration_table);
 
      % Reading data
      toread=[inpath,filename];
      % using ncread
-     disp('% opening file ')
+     %disp('% opening file ')
      ncid = netcdf.open(toread, 'NC_NOWRITE');
      % trackNcids = netcdf.inqGrps(ncid);
      
@@ -32,7 +32,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      seconds_str = regexp(time_resolution_coverage, '([\d\.]+)S', 'tokens');
      sampling_seconds = str2double(seconds_str{1});
 
-     disp('% reading lat/lon')
+     %disp('% reading lat/lon')
      
      varID=netcdf.inqVarID(ncid, 'sp_lat')  ;
      sp_lat= (netcdf.getVar(ncid,varID)) ;                                 % Latitude   
@@ -42,7 +42,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      sp_lon = rem((sp_lon+180),360)-180;                                   % Longitude
      % sp_lon = rem((ncread(toread,'sp_lon')+180),360)-180;                % Longitude old version
                                       
-     disp('% reading satellite ID and time ')
+     %disp('% reading satellite ID and time ')
 
      varID=netcdf.inqVarID(ncid, 'spacecraft_num')  ;
      scid=netcdf.getVar(ncid,varID) ; 
@@ -61,7 +61,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      ts=repmat(ts',4,1);                                                   % time in seconds since 2017-03-27 00:00:00.999261529
      % ts=repmat(ncread(toread,'ddm_timestamp_utc')',4,1);                 % time in seconds since 2017-03-27 00:00:00.999261529 old version                   
 
-     disp('% reading observables ')
+     %disp('% reading observables ')
      varID=netcdf.inqVarID(ncid, 'nst_att_status')  ;
      nst_full=netcdf.getVar(ncid,varID) ; 
      nst_full= (repmat(nst_full',4,1)) ;                                   % attitude flag (not used over land)
@@ -103,8 +103,8 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      ddm_nbrcs= (netcdf.getVar(ncid,varID)) ;                              % Normalized BRCS
      %ddm_nbrcs=ncread(toread,'ddm_nbrcs');                                % Normalized BRCS old version 
 
-     varID=netcdf.inqVarID(ncid, 'brcs')  ;
-     brcs= (netcdf.getVar(ncid,varID)) ;                                   % added by Hamed to save full ddm
+     %varID=netcdf.inqVarID(ncid, 'brcs')  ;
+     %brcs= (netcdf.getVar(ncid,varID)) ;                                   % added by Hamed to save full ddm
      % brcs=ncread(toread,'brcs');                                         % added by Hamed to save full ddm old version
 
      varID=netcdf.inqVarID(ncid, 'reflectivity_peak')  ;
@@ -113,7 +113,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      varID=netcdf.inqVarID(ncid, 'ddm_ant')  ;
      receivingantenna=(netcdf.getVar(ncid,varID)) ;                 % Reading receiving Antenna pararmeters
      
-     disp('% bit ratio import')
+     %disp('% bit ratio import')
 
      varID=netcdf.inqVarID(ncid, 'bit_ratio_lo_hi_starboard')  ;
      bit_ratio_hi_lo_starboard=(netcdf.getVar(ncid,varID)) ;                 % Reading bit ratio for the starboard antenna
@@ -122,7 +122,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      bit_ratio_hi_lo_port=(netcdf.getVar(ncid,varID)) ;                 % Reading bit ratio for the starboard antenna     
      bit_ratio_hi_lo_port = repmat(bit_ratio_hi_lo_port',4,1);
 
-     disp('% reading spacecraft position and velocity to compute the specular point azimuth angle ')
+     %disp('% reading spacecraft position and velocity to compute the specular point azimuth angle ')
 
      varID=netcdf.inqVarID(ncid, 'sc_pos_x')  ;
      sc_pos_x=single(netcdf.getVar(ncid,varID)) ;  
@@ -148,7 +148,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      sc_vel_z=single(netcdf.getVar(ncid,varID)) ;          
      sc_vel_z = repmat(sc_vel_z',4,1);
 
-     disp('% reading quality flags ')
+     %disp('% reading quality flags ')
 
      varID=netcdf.inqVarID(ncid, 'quality_flags')  ;
      qc=netcdf.getVar(ncid,varID) ;                                        % quality flag bits
@@ -157,7 +157,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      varID=netcdf.inqVarID(ncid, 'quality_flags_2')  ;
      qc_2=netcdf.getVar(ncid,varID) ;                                      % quality flag bits number 2
 
-     disp('% reading analog power')
+     %disp('% reading analog power')
 
      varID=netcdf.inqVarID(ncid, 'power_analog')  ;
      pa=(netcdf.getVar(ncid,varID)) ;                                     % power analog is the DDM in Watt unit
@@ -166,7 +166,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      varID=netcdf.inqVarID(ncid, 'raw_counts')  ; 
      raw_counts= (netcdf.getVar(ncid,varID)) ;                             % DDM bin raw counts
 
-     disp('% DDM shape parameters')
+     %disp('% DDM shape parameters')
 
      varID=netcdf.inqVarID(ncid, 'coherency_ratio')  ;
      coherency_ratio= (netcdf.getVar(ncid,varID)) ;                        % Estimation of the ratio of received power between the central bins and periphery bins of the raw_counts DDM after the elimination of noise bins [4]. A higher ratio is more indicative of signal coherence.'
@@ -178,7 +178,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      maxpa=squeeze(max(pa(1:size(pa,1),1:size(pa,2),:,:)));
      peak=squeeze(max(maxpa(1:size(pa,2),:,:)));                           % peak of each DDM (tested vs for loop)
 
-     disp('% bit ratio choice, depending on the receiving antenna, port or starboard')
+     %disp('% bit ratio choice, depending on the receiving antenna, port or starboard')
      
      bit_ratio = bit_ratio_hi_lo_starboard;                      % default port
      bit_ratio(receivingantenna == 3) = ...
@@ -208,7 +208,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              peak=peak(pos);
              pa=pa(:,:,pos);
              raw_counts=raw_counts(:,:,pos) ;
-             brcs=brcs(:, :, pos);                                         % added by Hamed to save full ddm
+             %brcs=brcs(:, :, pos);                                         % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(pos);
              sc_pos_x=sc_pos_x(pos);
              sc_pos_y=sc_pos_y(pos);
@@ -246,7 +246,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              raw_counts=reshape(raw_counts(:,:,:,:),size(raw_counts,1),size(raw_counts,2),size(raw_counts,3)*size(raw_counts,4));
 
 
-             brcs=brcs(:, :, :);                                           % added by Hamed to save full ddm
+             %brcs=brcs(:, :, :);                                           % added by Hamed to save full ddm
              reflectivity_peak=reflectivity_peak(:);
              sc_pos_x=sc_pos_x(:);
              sc_pos_y=sc_pos_y(:);
@@ -264,19 +264,19 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
     end
      
      % Computing Reflectivity, Kurtosis and Kurtosis zero-Doppler
-     disp('% computing the azimuth angle of the specular point')
+     %disp('% computing the azimuth angle of the specular point')
      [sp_azimuth_angle_deg_north]=compute_azimuth_angle(sc_pos_x,sc_pos_y,sc_pos_z,sc_vel_x,sc_vel_y,sc_vel_z,phi_Initial_sp_az_orbit);
 
-     disp('% computing Reflectivity')
+     %disp('% computing Reflectivity')
      sp_rx_gain_linear=10.^(sp_rx_gain/10);
      Reflectivity_linear=(((4.*pi).^2).*peak.*((single(rxrange)+single(txrange)).^2))./(eirp.*sp_rx_gain_linear.*lambda.^2);
 %      disp('% Done ')    
      
-     disp('% computing Kurtosis ')
+     %disp('% computing Kurtosis ')
      pareshaped=reshape(pa(:,:,:),size(pa,1)*size(pa,2),size(pa,3));
      Kurtosis=squeeze(kurtosis(pareshaped));
      
-     disp('% computing Kurtosis zero-doppler')
+     %disp('% computing Kurtosis zero-doppler')
      zero_Dopp = squeeze(pa(6,:,:));
      Doppler_bins=repmat(Doppler_bins',1,size(pa,3));
      zero_Dopp((zero_Dopp <0))=0 ; 
