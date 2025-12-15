@@ -9,10 +9,6 @@ function CyGNSS_extract(configurationPath)
 close all
 clearvars -except configurationPath
 
-[~, sys] = memory;
-mem_before = sys.PhysicalMemory.Available;
-
-
 ex=exist('configurationPath') ;
 if ex ==0
     mode="GUI" ;
@@ -478,7 +474,7 @@ if aggregate_data
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
         spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation);
-        
+       
 %
 end
 close all

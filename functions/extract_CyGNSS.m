@@ -77,7 +77,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
         chkfile=dir([inpath 'cyg0' num2str(jj) '.ddmi.s' datechar '*.nc']);                    % to avoid end of execution in case file is missing
         if ~isempty(chkfile)    
             infile=chkfile.name;  
-            disp(['% reading satellite ' num2str(jj) ' - date ' datechar ' - file ' infile ])
+            disp(['% reading satellite ' num2str(jj) ' - date ' datechar '- file ' infile ])
             [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts,nst_full, ...
             prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
             qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, reflectivity_peak, ...
@@ -98,6 +98,8 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             pseudostd=ddm_pseudovariance(pa) ;     %    
             %disp('% computing the reflectivity calibration')
 
+            clear pa
+
             lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
             decimation_factor = ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
             [~, mask_idx] = ismember(lookup, calibration_table(:,1:3), 'rows'); % check the corrispondence between the two matrices
@@ -109,7 +111,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
 
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
             year=zeros(size(sp_lat)) + str2double(datechar(1:4)); % to have the same size as sp_lat also for the year, since we are interested in the UTC time
-        % cat variables
+            % cat variables
             %disp('% cat variables ')
             SCID=cat(1,SCID,scid(:));
             Year=cat(1,Year,year(:));
@@ -126,7 +128,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             EIRP=cat(1,EIRP, eirp(:));
             SNR=cat(1,SNR, snr(:));
             QC=cat(1,QC, qc(:)); 
-            PA=cat(3,PA, pa);
+            %PA=cat(3,PA, pa);
             PA_PEAK=cat(1,PA_PEAK, peak);
             NF=cat(1,NF, nf(:));
             DDM_NBRCS=cat(1,DDM_NBRCS, ddm_nbrcs(:)); 
