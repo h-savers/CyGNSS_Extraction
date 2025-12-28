@@ -129,8 +129,18 @@ LonMin=double(string(LonMin)) ; LonMax=double(string(LonMax)) ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     case "input" 
     disp('input mode')
-[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format, ...
-    snr_th, sp_rx_gain_th, inc_angl_th, nsnr_th] = ReadConfFile(configurationPath);
+[Taskname, initdate, enddate, savespace, CyGinpath, CyGoutpath, logpath, calibration_file, LatMin, LatMax, LonMin, LonMax, aggregate_data, out_format,...
+    snr_th, rx_gain_th, inc_angl_th, nsnr_th, coherency_th] = ReadConfFile(configurationPath);
+aggregate_data = strcmpi(aggregate_data, "Yes");  % numeric switch to aggregate data from different days and save it in a single file
+Taskname=char(Taskname) ; savespace=char(savespace); CyGinpath=char(CyGinpath) ; CyGoutpath=char(CyGoutpath) ; logpath=char(logpath) ; calibration_file=char(calibration_file) ; out_format=char(out_format) ; 
+project_name=Taskname ; 
+if strcmpi(savespace,"Yes")
+    data_coverage='land';
+elseif strcmpi(savespace,"No")
+    data_coverage='global';
+else
+    disp('The Filter out field was filled in incorrectly. Please enter either Yes or No')
+end
 % end switch between GUI and input
 end
 

@@ -49,7 +49,8 @@ function TE_width=computeTE(pa,delay_vector,Power_threshold)
                      diff_peak_trail = trail_peak_WF_ones - WF_trail_second;
                      diff_peak_threshold(ss) = peak_WF(ss) - WF_threshold_input(ss); %power loss at 70% power reduction
                      min_diff_threshold(ss) = min(abs(diff_peak_trail-diff_peak_threshold(ss)));
-                     closestIndex(ss) = find(min_diff_threshold(ss)) + (length(WF_trail) - length(WF_trail_second));
+                     % closestIndex(ss) = find(min_diff_threshold(ss)) + (length(WF_trail) - length(WF_trail_second));
+                     closestIndex(ss) = 1+ (length(WF_trail) - length(WF_trail_second));
                      WF_threshold_value(ss) = WF_trail(closestIndex(ss)); %closest value to the power threshold 70%, that means "WF_threshold_input" 
                      eligible_values_for_threshold = find(resampled_WF == WF_threshold_value(ss));
                      ind_thr_value(ss) = eligible_values_for_threshold(end); %select the farthest value from peak
