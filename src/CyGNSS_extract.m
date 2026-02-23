@@ -91,10 +91,11 @@ out_format=Answer{14};
 % ----- Added by Federico P. ----- %
 
 % Check if the output file format has been correctly insert  
-if ~contains(out_format, 'matlab', 'IgnoreCase', true) || ...
-   ~contains(out_format, 'netcdf', 'IgnoreCase', true)
+if contains(out_format, 'matlab', 'IgnoreCase', true) || ...
+   contains(out_format, 'netcdf', 'IgnoreCase', true)
 else
-    disp('Output file format is not supported, please check the input');
+    disp('ERROR: output file format is not supported, please check the input');
+    return
 end
 % Check if the "Filter out field" has been correclt insert
 if strcmpi(savespace,"Yes")
@@ -102,11 +103,11 @@ if strcmpi(savespace,"Yes")
 elseif strcmpi(savespace,"No")
     data_coverage='global';
 else
-    disp('The Filter out field was filled in incorrectly. Please enter either Yes or No')
+    disp('ERROR: the Filter out field was filled in incorrectly. Please enter either Yes or No')
 end
 
 % ----- End ----- %
-
+if exist(CyGoutpath)==0 ,  disp('The output folder does not exist. Please enter an existing folder'), return, end
 % init_SM_Day=datetime(Answer{2}) ; 
 % final_SM_Day=datetime(Answer{3}) ; 
 % write the new configuration file
