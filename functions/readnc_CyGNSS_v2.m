@@ -12,8 +12,14 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
 
      % Reading the lookup table for the calibration
      %disp("% opening the lookup table for reflectivity calibration")
-     calibration_table = readtable(calibration_file, 'Delimiter', ',');
-     calibration_table = table2array(calibration_table);
+     if strcmp(calibration_file, "No")
+    calibration_table = [];
+        else
+    calibration_table = readtable(calibration_file, 'Delimiter', ',');
+    calibration_table = table2array(calibration_table);
+        end
+
+
 
      % Reading data
      toread=[inpath,filename];
@@ -195,6 +201,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              ts=ts(pos);
              nst_full=nst_full(pos);
              prn=prn(pos);
+             azimuth_angle=azimuth_angle(pos);
              theta=theta(pos);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(pos);
              sp_rx_gain=sp_rx_gain(pos);
@@ -230,7 +237,6 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              ts=ts(:);
              nst_full=nst_full(:);
              prn=prn(:);
-             azimuth_angle=azimuth_angle(:);
              theta=theta(:);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(:);
              sp_rx_gain=sp_rx_gain(:);

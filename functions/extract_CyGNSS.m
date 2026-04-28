@@ -99,16 +99,18 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
             %disp('% computing the reflectivity calibration')
 
             clear pa
-
-            lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
-            decimation_factor = ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
-            [~, mask_idx] = ismember(lookup, calibration_table(:,1:3), 'rows'); % check the corrispondence between the two matrices
-            valid = mask_idx > 0; % check the logic indices
-            decimation_factor(valid) = calibration_table(mask_idx(valid), 4); % extract the decimation factor from the calibration_table
-            valid = (reflectivity_peak ~= -9999); % check if the reflectivity_peak vector has -9999 values, in that case do not calibrate the results
-            reflectivity_peak_calibrated = -9999 * ones(size(reflectivity_peak));
-            reflectivity_peak_calibrated(valid) = reflectivity_peak(valid) .* decimation_factor(valid);
-
+            if isempty(calibration_table)
+                reflectivity_peak_calibrated = -9999 * ones(size(reflectivity_peak));
+            else
+                lookup = [scid(:) sv_num(:) receivingantenna(:)]; % create a composite matrix of receiving spacecraft number, spacecraft number and receiving antenna
+                decimation_factor = ones(size(lookup,1),1); % create a matrix in a correct size for the decimation factor for the calibration
+                [~, mask_idx] = ismember(lookup, calibration_table(:,1:3), 'rows'); % check the corrispondence between the two matrices
+                valid = mask_idx > 0; % check the logic indices
+                decimation_factor(valid) = calibration_table(mask_idx(valid), 4); % extract the decimation factor from the calibration_table
+                valid = (reflectivity_peak ~= -9999); % check if the reflectivity_peak vector has -9999 values, in that case do not calibrate the results
+                reflectivity_peak_calibrated = -9999 * ones(size(reflectivity_peak));
+                reflectivity_peak_calibrated(valid) = reflectivity_peak(valid) .* decimation_factor(valid);
+            end
             dayofyear=zeros(size(sp_lat)) + doy;  % to have the same size as sp_lat
             year=zeros(size(sp_lat)) + str2double(datechar(1:4)); % to have the same size as sp_lat also for the year, since we are interested in the UTC time
             % cat variables
