@@ -385,7 +385,7 @@ for ii=1:length(datelist)     % loop on all the days
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; reflectivityPeakRecal_L1_L=reflectivityPeakRecal_L1_L(subgeo) ;
         qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ; coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ; ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; 
-        notRecommended=notRecommended(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
+        notRecommended=notRecommended(subgeo) ; pseudoStd=pseudoStd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
     end
             s=duration(0,0,toc);
             save_file(mission, out_format, L1b_product, L1b_product_version,...
@@ -396,7 +396,7 @@ for ii=1:length(datelist)     % loop on all the days
             rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
             kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
             noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
-            spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended,coefficientOfVariation);
+            spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended,coefficientOfVariation,pseudoStd);
         end
     %%%%%%%%%%%%%%%%%%%%% Displaying Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %          scattermap(real(10.*log10(REFLECTIVITY_LINEAR)),SPLAT,SPLON,datechar,-40,0)
@@ -473,7 +473,7 @@ if aggregate_data
         teWidth=teWidth(subgeo) ; NBRCS_L1_L=NBRCS_L1_L(subgeo) ; powerAnalogW_L1_L=powerAnalogW_L1_L(subgeo) ; qualityFlags_L1_L=qualityFlags_L1_L(subgeo) ; noiseFloorCounts_L1_L=noiseFloorCounts_L1_L(subgeo) ;
         receivingAntenna=receivingAntenna(subgeo) ; reflectivityPeak_L1_L=reflectivityPeak_L1_L(subgeo) ; qualityFlags_2_L1_L=qualityFlags_2_L1_L(subgeo) ;  coherencyRatio_L1_L=coherencyRatio_L1_L(subgeo) ;
         ddmLes=ddmLes(subgeo) ; powerRatio_L1_L=powerRatio_L1_L(subgeo) ; notToBeUsed=notToBeUsed(subgeo) ; notRecommended=notRecommended(subgeo) ;
-        spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudostd=pseudostd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
+        spAzimuthAngleDegNorth=spAzimuthAngleDegNorth(subgeo) ; pseudoStd=pseudoStd(subgeo) ; bitRatio=bitRatio(subgeo) ; coefficientOfVariation=coefficientOfVariation(subgeo) ;
     end
         s=duration(0,0,toc);
         save_file(mission, out_format, L1b_product, L1b_product_version,...
@@ -484,7 +484,7 @@ if aggregate_data
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityFlags_2_L1_L, bitRatio, ...
-        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation);
+        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation,pseudoStd);
        
 %
 end
