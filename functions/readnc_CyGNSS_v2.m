@@ -201,7 +201,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
              ts=ts(pos);
              nst_full=nst_full(pos);
              prn=prn(pos);
-             azimuth_angle=azimuth_angle(pos);
+%              azimuth_angle=azimuth_angle(pos);
              theta=theta(pos);
              phi_Initial_sp_az_orbit=phi_Initial_sp_az_orbit(pos);
              sp_rx_gain=sp_rx_gain(pos);
