@@ -234,6 +234,7 @@ Doppler_bins=1:1:17;
 Power_threshold=0.7;
 lambda=0.1903;                                                             % 0.19 m --> 19 cm  
 %nsat=8;                                                                   % CyGNSS constellation
+requested_sats = [1, 2];                                                   % CyGNSS sat IDs to extract; set [] to use every sat present
 % resolution=36;                                                           % Km for ease grid converter
 
 %%%%%%%%%%%%%%%%%%%%% INITIALIZING EMPTY VARIABLES FOR AGGREGATED SINGLE OUTPUT FILE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -282,6 +283,8 @@ else
     disp('% Processing each day separately and saving individual output files');
 end
 
+
+mission = 'CyGNSS';
 %%%%%%%%%%%%%%%%%%%%% STARTING THE MAIN LOOP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic
 % % figure;
@@ -305,7 +308,7 @@ for ii=1:length(datelist)     % loop on all the days
             dayOfYear,secondOfDay,receivingSpacecraft,transmittingSpacecraft,pseudoRandomNoise,specularPointLat,specularPointLon,incidenceAngleDeg,rxAntennaGain_L1_L, EIRP_L1,SNR_L1_L, spAzimuthAngleDegOrbit,...
             reflectivityLinear_L1_L,kurtosisDDM,kurtosisDopp0,teWidth,NBRCS_L1_L,powerAnalogW_L1_L,qualityFlags_L1_L,noiseFloorCounts_L1_L,receivingAntenna,...
             spAzimuthAngleDegNorth, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, qualityFlags_2_L1_L , coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, pseudoStd, bitRatio,coefficientOfVariation]= ...
-            extract_CyGNSS(datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold);  
+            extract_CyGNSS(datechar,doy,DoY_infolderpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold,requested_sats);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if aggregate_data

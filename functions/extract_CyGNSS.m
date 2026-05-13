@@ -20,7 +20,7 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
         DoY,SoD,SCID,SV_NUM,PRN,SPLAT,SPLON,THETA,GAIN,EIRP,SNR,PHI_Initial_sp_az_orbit, ...
         REFLECTIVITY_LINEAR,KURTOSIS,KURTOSIS_DOPP_0,TE_WIDTH,DDM_NBRCS,PA_PEAK,QC,NF,RECEIVING_ANTENNA...
         SP_AZIMUTH_ANGLE, REFLECTIVITY_PEAK, REFLECTIVITY_PEAK_CALIBRATED, QC_2, COHERENCY_RATIO, DDM_LES, PR,PSEUDOSTD,BIT_RATIO,COEFFICIENT_OF_VARIATION]= ...
-        extract_CyGNSS(datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold)
+        extract_CyGNSS(datechar,doy,inpath,logpath,calibration_file,lambda,Doppler_bins,savespace,delay_vector,Power_threshold,requested_sats)
       
     %%%%%%%%%%%%%%%%%%%% INITIALISING VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     timeUTC=[];
@@ -68,12 +68,23 @@ function [mission,L1b_product,L1b_product_version,timeUTC, ...
     length(chkfile);
     sat_index=[];
 
-    for i=1:length(chkfile)        
+    for i=1:length(chkfile)
         sat_index=[sat_index, str2num(chkfile(i).name(5))];
     end
 
+    if ~isempty(requested_sats)
+        missing = setdiff(requested_sats, sat_index);
+        if ~isempty(missing)
+            diary([logpath 'log_' datestr(now,'dd-mm-yyyy') '.txt'])
+            disp(['% INFO: requested sat(s) ' num2str(missing) ' not available for ' datechar ' - skipping'])
+            diary off
+        end
+        sat_index = intersect(sat_index, requested_sats);
+    end
+    disp(['% processing sats: ' num2str(sat_index) ' for date ' datechar])
+
 %%%%%%%%%%%%%%%%%%%%%
-    for jj=sat_index     % loop on  the 8 satellites   
+    for jj=sat_index     % loop on  the 8 satellites
         chkfile=dir([inpath 'cyg0' num2str(jj) '.ddmi.s' datechar '*.nc']);                    % to avoid end of execution in case file is missing
         if ~isempty(chkfile)    
             infile=chkfile.name;  
