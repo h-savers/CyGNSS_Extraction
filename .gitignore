@@ -33,4 +33,4 @@ codegen/
 .MATLABDriveTag
 
 
-/conf/*.mat
+/conf/*.matconf/configuration.cfg
