@@ -11,7 +11,7 @@ function save_file(mission, out_format, L1b_product, L1b_product_version,...
         rxAntennaGain_L1_L, EIRP_L1, SNR_L1_L, reflectivityLinear_L1_L, ...
         kurtosisDDM, kurtosisDopp0, teWidth, NBRCS_L1_L, powerAnalogW_L1_L, qualityControlFlags_L1_L, ...
         noiseFloorCounts_L1_L, reflectivityPeak_L1_L, reflectivityPeakRecal_L1_L, receivingAntenna, qualityControlFlags_2_L1_L, bitRatio, ...
-        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation,pseudostd);
+        spAzimuthAngleDegNorth, coherencyRatio_L1_L, ddmLes, powerRatio_L1_L, notToBeUsed, notRecommended, coefficientOfVariation,pseudostd,scaleFactor);
 
 powerRatio_L1_L=single(powerRatio_L1_L) ; 
 
@@ -29,7 +29,7 @@ if strcmpi(out_format,"Matlab")
         'kurtosisDopp0', 'teWidth', 'NBRCS_L1_L','powerAnalogW_L1_L', ...
         'qualityControlFlags_L1_L', 'noiseFloorCounts_L1_L','reflectivityPeak_L1_L', 'reflectivityPeakRecal_L1_L',...
         'receivingAntenna', 'qualityControlFlags_2_L1_L', 'bitRatio', 'spAzimuthAngleDegNorth', 'coherencyRatio_L1_L', ...
-        'ddmLes', 'powerRatio_L1_L', 'notToBeUsed', 'notRecommended','coefficientOfVariation','pseudostd','-v7.3');
+        'ddmLes', 'powerRatio_L1_L', 'notToBeUsed', 'notRecommended','coefficientOfVariation','pseudostd','scaleFactor','-v7.3');
     
 elseif strcmpi(out_format,"netcdf")
     % Create NetCDF file
@@ -133,6 +133,9 @@ elseif strcmpi(out_format,"netcdf")
         var_bitRatio = netcdf.defVar(netcdf_cyg,'bitRatio','NC_FLOAT',dimid);
         netcdf.putAtt(netcdf_cyg, var_bitRatio, 'bitRatio', 'Port low/high bit counter ratio defined as (plus_1_cnts + minus_1_cnts) / (plus_3_cnts + minus_3_cnts).');
 
+        var_scaleFactor = netcdf.defVar(netcdf_cyg,'scaleFactor','NC_DOUBLE',dimid);
+        netcdf.putAtt(netcdf_cyg, var_scaleFactor, 'scaleFactor', 'Scale factor (SS_r) computed from tx/rx ranges as Aeff*(tx_to_sp_range+rx_to_sp_range)^2 / (4*pi*tx_to_sp_range^2*rx_to_sp_range^2), with Aeff=189.6e6 m^2');
+
         %var_reflectivityLinear_L1_L = netcdf.defVar(netcdf_cyg,'reflectivityLinear_L1_L','NC_DOUBLE',dimid);
         %netcdf.putAtt(netcdf_cyg, var_reflectivityLinear_L1_L, 'reflectivityLinear_L1_L', 'Reflection coefficient of GPS signal L1, left polarization [dB]');
 
@@ -168,6 +171,7 @@ elseif strcmpi(out_format,"netcdf")
         netcdf.putVar(netcdf_cyg, var_powerAnalogW_L1_L, powerAnalogW_L1_L);
         netcdf.putVar(netcdf_cyg, var_noiseFloorCounts_L1_L, noiseFloorCounts_L1_L);
         netcdf.putVar(netcdf_cyg, var_bitRatio, bitRatio);
+        netcdf.putVar(netcdf_cyg, var_scaleFactor, scaleFactor);
         %netcdf.putVar(netcdf_cyg, var_reflectivityLinear_L1_L, reflectivityLinear_L1_L)
 
 %% ------- Close netcdf file ------- %%

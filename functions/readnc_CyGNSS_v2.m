@@ -7,7 +7,7 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
     prn,theta,phi_Initial_sp_az_orbit,sp_rx_gain,eirp,snr,nf,rxrange,txrange,ddm_nbrcs,...
     qc,pa,peak,Reflectivity_linear,Kurtosis, Kurtosis_dopp0, reflectivity_peak, ...
     receivingantenna, sp_azimuth_angle_deg_north, qc_2, coherency_ratio, ddm_les, ...
-    raw_counts,bit_ratio,calibration_table,sampling_seconds]= ...
+    raw_counts,bit_ratio,calibration_table,sampling_seconds,SS_r]= ...
     readnc_CyGNSS_v2(inpath,filename,calibration_file,lambda,Doppler_bins,savespace)
 
      % Reading the lookup table for the calibration
@@ -272,6 +272,14 @@ function [mission, L1b_product, L1b_product_version,sp_lat,sp_lon,scid,sv_num,ts
      % Computing Reflectivity, Kurtosis and Kurtosis zero-Doppler
      %disp('% computing the azimuth angle of the specular point')
      [sp_azimuth_angle_deg_north]=compute_azimuth_angle(sc_pos_x,sc_pos_y,sc_pos_z,sc_vel_x,sc_vel_y,sc_vel_z,phi_Initial_sp_az_orbit);
+
+
+     % Computing the scale factor (SS_r) from tx/rx ranges
+     Aeff=189.6.*10.^6; %ricavata con la formula inversa 189.6*10^6 m^2
+     txrange_d=double(txrange);
+     rxrange_d=double(rxrange);
+     SS_r=(Aeff.*((txrange_d+rxrange_d).^2))./(4.*pi.*(txrange_d.^2).*(rxrange_d.^2));
+
 
      %disp('% computing Reflectivity')
      sp_rx_gain_linear=10.^(sp_rx_gain/10);
